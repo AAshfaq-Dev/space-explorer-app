@@ -3,7 +3,24 @@
 {% block content %}
 <div>
     <h2>🤖 Ask Space AI</h2>
-    <p>Ask me anything about space, planets, satellites, and the universe!</p>
+    <p>Ask me anything about space!</p>
+
+    <!-- Voice Controls - Updated for mobile -->
+    <div style="text-align: center; margin: 20px 0;">
+        <button id="voice-button" onclick="toggleVoiceRecording()"
+            style="background-color: #FF5722; color: white; padding: 15px 30px; border: none; border-radius: 50px; cursor: pointer; font-size: 16px; margin: 10px; touch-action: manipulation;">
+            🎤 Tap to Talk
+        </button>
+
+        <button id="stop-speaking-button" onclick="stopSpeaking()"
+            style="background-color: #9E9E9E; color: white; padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; display: none; touch-action: manipulation;">
+            🔇 Stop Speaking
+        </button>
+
+        <div id="voice-status" style="margin: 10px 0; font-weight: bold; color: #4CAF50;">
+            Ready to listen! Tap the microphone and speak.
+        </div>
+    </div>
 
     <!-- Chat Container -->
     <div id="chat-container"
@@ -12,14 +29,14 @@
             <!-- Welcome message -->
             <div style="background-color: #444; padding: 10px; border-radius: 5px; margin: 10px 0;">
                 <strong>Space AI:</strong> Hi there, space explorer! Ask me anything about the universe - planets,
-                satellites, astronauts, or how things work in space!
+                satellites, astronauts, or how things work in space! You can type or use the microphone to talk to me!
             </div>
         </div>
     </div>
 
     <!-- Input Area -->
     <div style="display: flex; gap: 10px; margin: 20px 0;">
-        <input type="text" id="question-input" placeholder="Ask about space..."
+        <input type="text" id="question-input" placeholder="Ask about space... or use voice!"
             style="flex: 1; padding: 10px; border: none; border-radius: 5px; background-color: #444; color: white;"
             onkeypress="handleKeyPress(event)">
         <button onclick="askQuestion()" id="ask-button"
@@ -38,6 +55,134 @@
     // Store conversation history
     let conversationHistory = [];
 
+    // Voice recognition setup
+    let recognition = null;
+    let speechSynthesis = window.speechSynthesis;
+    let isRecording = false;
+
+    // Initialize speech recognition
+    function initSpeechRecognition() {
+        // Check for iOS Safari specifically
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            // iOS-specific settings
+            if (isIOS) {
+                recognition.continuous = false;
+                recognition.interimResults = false;
+            }
+
+            recognition.onstart = function () {
+                isRecording = true;
+                updateVoiceStatus('🎤 Listening... speak now!', '#FF5722');
+                document.getElementById('voice-button').textContent = '🔴 Tap to Stop';
+                document.getElementById('voice-button').style.backgroundColor = '#f44336';
+            };
+
+            recognition.onresult = function (event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('question-input').value = transcript;
+                updateVoiceStatus('✅ Got it: "' + transcript + '"', '#4CAF50');
+
+                // Automatically ask the question after short delay
+                setTimeout(() => {
+                    askQuestion();
+                }, 1500);
+            };
+
+            recognition.onerror = function (event) {
+                console.log('Speech recognition error:', event.error);
+                updateVoiceStatus('❌ Couldn\'t hear that. Try again!', '#f44336');
+                resetVoiceButton();
+            };
+
+            recognition.onend = function () {
+                isRecording = false;
+                if (document.getElementById('voice-button').textContent === '🔴 Tap to Stop') {
+                    updateVoiceStatus('🤔 Processing what you said...', '#FF9800');
+                }
+                resetVoiceButton();
+            };
+
+            // Show that voice is available
+            updateVoiceStatus('✅ Voice ready! Tap microphone to start.', '#4CAF50');
+
+        } else {
+            document.getElementById('voice-button').style.display = 'none';
+            updateVoiceStatus('Voice not supported in this browser. Try Chrome!', '#9E9E9E');
+        }
+    }
+
+    function toggleVoiceRecording() {
+        if (!recognition) {
+            alert('Voice recognition not available. Try using Chrome browser.');
+            return;
+        }
+
+        if (isRecording) {
+            // Stop recording
+            recognition.stop();
+            updateVoiceStatus('🛑 Stopped listening', '#9E9E9E');
+        } else {
+            // Start recording
+            try {
+                recognition.start();
+            } catch (error) {
+                console.log('Error starting recognition:', error);
+                updateVoiceStatus('❌ Voice not available. Try reloading page.', '#f44336');
+            }
+        }
+    }
+
+    function resetVoiceButton() {
+        document.getElementById('voice-button').textContent = '🎤 Tap to Talk';
+        document.getElementById('voice-button').style.backgroundColor = '#FF5722';
+        if (!isRecording) {
+            updateVoiceStatus('Ready to listen! Tap the microphone and speak.', '#4CAF50');
+        }
+    }
+
+    function updateVoiceStatus(message, color) {
+        const status = document.getElementById('voice-status');
+        status.textContent = message;
+        status.style.color = color;
+    }
+
+    function speakText(text) {
+        // Stop any currently speaking text
+        speechSynthesis.cancel();
+
+        // Create speech utterance
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9; // Slightly slower for kids
+        utterance.pitch = 1.1; // Slightly higher pitch, friendlier
+        utterance.volume = 0.8;
+
+        // Show stop button while speaking
+        document.getElementById('stop-speaking-button').style.display = 'inline-block';
+
+        utterance.onend = function () {
+            document.getElementById('stop-speaking-button').style.display = 'none';
+        };
+
+        utterance.onerror = function () {
+            document.getElementById('stop-speaking-button').style.display = 'none';
+        };
+
+        speechSynthesis.speak(utterance);
+    }
+
+    function stopSpeaking() {
+        speechSynthesis.cancel();
+        document.getElementById('stop-speaking-button').style.display = 'none';
+    }
+
     function handleKeyPress(event) {
         if (event.key === 'Enter') {
             askQuestion();
@@ -49,7 +194,7 @@
         const question = input.value.trim();
 
         if (!question) {
-            alert('Please type a question!');
+            speakText('Please ask me a question!');
             return;
         }
 
@@ -81,6 +226,9 @@
                     // Add AI response to chat
                     addMessage('Space AI', data.response, 'ai');
 
+                    // Speak the response aloud
+                    speakText(data.response);
+
                     // Update conversation history
                     conversationHistory.push({
                         question: question,
@@ -92,13 +240,17 @@
                         conversationHistory = conversationHistory.slice(-5);
                     }
                 } else {
-                    addMessage('Space AI', data.message || 'Sorry, I had trouble with that question.', 'error');
+                    const errorMessage = data.message || 'Sorry, I had trouble with that question.';
+                    addMessage('Space AI', errorMessage, 'error');
+                    speakText(errorMessage);
                 }
             })
             .catch(error => {
                 showLoading(false);
                 disableInput(false);
-                addMessage('Space AI', 'Oops! Something went wrong. Please try again.', 'error');
+                const errorMessage = 'Oops! Something went wrong. Please try again.';
+                addMessage('Space AI', errorMessage, 'error');
+                speakText(errorMessage);
                 console.error('Error:', error);
             });
     }
@@ -133,6 +285,10 @@
     function disableInput(disable) {
         document.getElementById('question-input').disabled = disable;
         document.getElementById('ask-button').disabled = disable;
+        document.getElementById('voice-button').disabled = disable;
     }
+
+    // Initialize speech recognition when page loads
+    window.addEventListener('load', initSpeechRecognition);
 </script>
 {% endblock %}
