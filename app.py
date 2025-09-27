@@ -1,19 +1,29 @@
 # Main Flask Application entry point
 import os
+import time
 from flask import Flask, render_template, jsonify, request
 from dotenv import load_dotenv
 from services.n2yo_service import N2YOService  # Allows connection to N2YO API
 from services.gemini_service import GeminiService  # Allows connection to Gemini API
 from services.tts_service import TTSService  # Allows conncetion to Googles TTS API
+from services.rate_limiter import create_limiter  # adds limits to requests
 
 # Loads environment from env. file
 load_dotenv()
 
 # Creates Flask application instance
 app = Flask(__name__)
+limiter = create_limiter(app)
 
 # Configures Flask
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
+
+
+@app.route("/test-limit")
+@limiter.limit("3 per minute")  # Very low limit for testing
+def test_limit():
+    """Test route to verify rate limiting works"""
+    return jsonify({"message": "Rate limit test successful", "timestamp": time.time()})
 
 
 # Basic route - home page
@@ -57,6 +67,7 @@ def satellites():
 
 
 @app.route("/api/iss-position")
+@limiter.limit("15 per minute")  # Limits satelite requests
 def get_iss_position():
     """API endpoint to get current ISS position"""
     # Creates a service instance
@@ -87,6 +98,7 @@ def chat():
 
 
 @app.route("/api/ask", methods=["POST"])
+@limiter.limit("10 per minute")  # Limits AI requests
 def ask_ai():
     """API endpoint for AI chat questions"""
 
@@ -116,6 +128,7 @@ def ask_ai():
 
 
 @app.route("/api/ask-with-voice", methods=["POST"])
+@limiter.limit("10 per minute")  # Limits AI requests
 def ask_ai_with_voice():
     """API endpoint for AI chat with voice response using Googles TTS"""
     try:
