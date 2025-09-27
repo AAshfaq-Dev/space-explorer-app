@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    <h2>🛰️ Satellite Tracker</h2>
+
+    <!-- ISS Tracking Section -->
+    <div style="background-color: #333; padding: 20px; border-radius: 10px; margin: 20px 0;">
+        <h3>International Space Station (ISS)</h3>
+
+        <!-- ISS Position Display -->
+        <div id="iss-info" style="margin: 15px 0;">
+            <p>Click "Track ISS" to get current position</p>
+        </div>
+
+        <!-- Control Button -->
+        <button onclick="trackISS()"
+            style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+            Track ISS
+        </button>
+
+        <!-- Loading indicator -->
+        <div id="loading" style="display: none; margin: 10px 0;">
+            <p>🔄 Getting ISS position...</p>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for API interaction -->
+<script>
+    function trackISS() {
+        // Show loading indicator
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('iss-info').innerHTML = '<p>Loading...</p>';
+
+        // Make API request to our Flask endpoint
+        fetch('/api/iss-position')
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading indicator
+                document.getElementById('loading').style.display = 'none';
+
+                // Display the results
+                displayISSData(data);
+            })
+            .catch(error => {
+                // Handle errors
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('iss-info').innerHTML =
+                    '<p style="color: red;">Error: Could not fetch ISS data</p>';
+                console.error('Error:', error);
+            });
+    }
+
+    function displayISSData(data) {
+        const infoDiv = document.getElementById('iss-info');
+
+        if (data.status === 'success') {
+            // Create a nicely formatted display
+            const timestamp = new Date(data.timestamp * 1000).toLocaleString();
+
+            infoDiv.innerHTML = `
+            <div style="background-color: #444; padding: 15px; border-radius: 5px;">
+                <h4>${data.satellite_name} Current Position</h4>
+                <p><strong>Latitude:</strong> ${parseFloat(data.latitude).toFixed(4)}°</p>
+                <p><strong>Longitude:</strong> ${parseFloat(data.longitude).toFixed(4)}°</p>
+                <p><strong>Altitude:</strong> ${parseFloat(data.altitude_km).toFixed(2)} km</p>
+                <p><strong>Last Updated:</strong> ${timestamp}</p>
+            </div>
+        `;
+        } else {
+            // Display error message
+            infoDiv.innerHTML = `
+            <p style="color: red;">Error: ${data.message}</p>
+        `;
+        }
+    }
+</script>
+{% endblock %}
