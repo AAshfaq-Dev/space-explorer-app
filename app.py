@@ -2,7 +2,8 @@
 import os
 from flask import Flask, render_template, jsonify, request
 from dotenv import load_dotenv
-from services.n2yo_service import N2YOService
+from services.n2yo_service import N2YOService  # Allows connection to N2YO API
+from services.gemini_service import GeminiService  # Allows connection to Gemini API
 
 # Loads environment from env. file
 load_dotenv()
@@ -75,6 +76,43 @@ def get_iss_position():
 # URL parameters: request.args.get() reads optional query parameters
 # Type conversion: type=float ensures coordinates are numbers
 # JSON API: Returns data that JavaScript can consume
+
+
+# Gemini Chat Interface
+@app.route("/chat")
+def chat():
+    """AI Chat page - Q&A Service"""
+    return render_template("chat.html", title="Ask Space Agent")
+
+
+@app.route("/api/ask", methods=["POST"])
+def ask_ai():
+    """API endpoint for AI chat questions"""
+
+    try:
+        # Get question from request
+        data = request.get_json()
+        question = data.get("question", "").strip()
+
+        if not question:
+            return jsonify({"status": "error", "message": "Please ask a question"})
+
+        # Get conversation history if provided
+        conversation_history = data.get("history", [])
+
+        # Create gemini service and ask question
+        gemini_service = GeminiService()
+        result = gemini_service.ask_question(question, conversation_history)
+
+        return jsonify(result)
+    except Exception as error:
+        return jsonify(
+            {
+                "status": "error",
+                "message": "Sorry, something went wrong. Please try again!",
+            }
+        )
+
 
 # Main executation block
 
