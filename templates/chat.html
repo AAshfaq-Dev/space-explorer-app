@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    <h2>🤖 Ask Space AI</h2>
+    <p>Ask me anything about space, planets, satellites, and the universe!</p>
+
+    <!-- Chat Container -->
+    <div id="chat-container"
+        style="background-color: #333; border-radius: 10px; padding: 20px; margin: 20px 0; height: 400px; overflow-y: auto;">
+        <div id="chat-messages">
+            <!-- Welcome message -->
+            <div style="background-color: #444; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <strong>Space AI:</strong> Hi there, space explorer! Ask me anything about the universe - planets,
+                satellites, astronauts, or how things work in space!
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div style="display: flex; gap: 10px; margin: 20px 0;">
+        <input type="text" id="question-input" placeholder="Ask about space..."
+            style="flex: 1; padding: 10px; border: none; border-radius: 5px; background-color: #444; color: white;"
+            onkeypress="handleKeyPress(event)">
+        <button onclick="askQuestion()" id="ask-button"
+            style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+            Ask
+        </button>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading" style="display: none; text-align: center; margin: 10px 0;">
+        <p>🤔 Thinking about your question...</p>
+    </div>
+</div>
+
+<script>
+    // Store conversation history
+    let conversationHistory = [];
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            askQuestion();
+        }
+    }
+
+    function askQuestion() {
+        const input = document.getElementById('question-input');
+        const question = input.value.trim();
+
+        if (!question) {
+            alert('Please type a question!');
+            return;
+        }
+
+        // Add user question to chat
+        addMessage('You', question, 'user');
+
+        // Clear input and show loading
+        input.value = '';
+        showLoading(true);
+        disableInput(true);
+
+        // Make API request
+        fetch('/api/ask', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                question: question,
+                history: conversationHistory
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                disableInput(false);
+
+                if (data.status === 'success') {
+                    // Add AI response to chat
+                    addMessage('Space AI', data.response, 'ai');
+
+                    // Update conversation history
+                    conversationHistory.push({
+                        question: question,
+                        response: data.response
+                    });
+
+                    // Keep only last 5 exchanges to manage context
+                    if (conversationHistory.length > 5) {
+                        conversationHistory = conversationHistory.slice(-5);
+                    }
+                } else {
+                    addMessage('Space AI', data.message || 'Sorry, I had trouble with that question.', 'error');
+                }
+            })
+            .catch(error => {
+                showLoading(false);
+                disableInput(false);
+                addMessage('Space AI', 'Oops! Something went wrong. Please try again.', 'error');
+                console.error('Error:', error);
+            });
+    }
+
+    function addMessage(sender, message, type) {
+        const chatMessages = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+
+        let backgroundColor = '#444';
+        if (type === 'user') backgroundColor = '#2196F3';
+        if (type === 'error') backgroundColor = '#f44336';
+
+        messageDiv.style.cssText = `
+        background-color: ${backgroundColor};
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        word-wrap: break-word;
+    `;
+
+        messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+        chatMessages.appendChild(messageDiv);
+
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function showLoading(show) {
+        document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+
+    function disableInput(disable) {
+        document.getElementById('question-input').disabled = disable;
+        document.getElementById('ask-button').disabled = disable;
+    }
+</script>
+{% endblock %}
