@@ -179,7 +179,16 @@
     }
 
     function stopSpeaking() {
+        // Stop browser speech synthesis
         speechSynthesis.cancel();
+
+        // Stop any playing audio elements
+        const audioElements = document.querySelectorAll('audio');
+        audioElements.forEach(audio => {
+            audio.pause();
+            audio.currentTime = 0;
+        });
+
         document.getElementById('stop-speaking-button').style.display = 'none';
     }
 
@@ -206,8 +215,8 @@
         showLoading(true);
         disableInput(true);
 
-        // Make API request
-        fetch('/api/ask', {
+        // Make API request to the new voice-enabled endpoint
+        fetch('/api/ask-with-voice', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -226,8 +235,12 @@
                     // Add AI response to chat
                     addMessage('Space AI', data.response, 'ai');
 
-                    // Speak the response aloud
-                    speakText(data.response);
+                    // Play natural voice if available, fallback to browser voice
+                    if (data.audio_available && data.audio_data) {
+                        playNaturalVoice(data.audio_data);
+                    } else {
+                        speakText(data.response); // Fallback to browser voice
+                    }
 
                     // Update conversation history
                     conversationHistory.push({
@@ -242,7 +255,7 @@
                 } else {
                     const errorMessage = data.message || 'Sorry, I had trouble with that question.';
                     addMessage('Space AI', errorMessage, 'error');
-                    speakText(errorMessage);
+                    speakText(errorMessage); // Use browser voice for errors
                 }
             })
             .catch(error => {
@@ -253,6 +266,52 @@
                 speakText(errorMessage);
                 console.error('Error:', error);
             });
+    }
+
+    // Add this new function for playing Google's natural voice
+    function playNaturalVoice(audioData) {
+        try {
+            // Stop any currently playing browser speech
+            speechSynthesis.cancel();
+
+            // Convert base64 to audio blob
+            const audioBytes = atob(audioData);
+            const arrayBuffer = new ArrayBuffer(audioBytes.length);
+            const uint8Array = new Uint8Array(arrayBuffer);
+
+            for (let i = 0; i < audioBytes.length; i++) {
+                uint8Array[i] = audioBytes.charCodeAt(i);
+            }
+
+            const audioBlob = new Blob([arrayBuffer], { type: 'audio/mp3' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            // Create and play audio element
+            const audio = new Audio(audioUrl);
+
+            // Show stop button while playing
+            document.getElementById('stop-speaking-button').style.display = 'inline-block';
+
+            audio.onended = function () {
+                document.getElementById('stop-speaking-button').style.display = 'none';
+                URL.revokeObjectURL(audioUrl); // Clean up memory
+            };
+
+            audio.onerror = function () {
+                console.log('Natural voice playback failed, using browser voice');
+                document.getElementById('stop-speaking-button').style.display = 'none';
+                URL.revokeObjectURL(audioUrl);
+                // Fallback to browser voice
+                speakText(data.response);
+            };
+
+            audio.play();
+
+        } catch (error) {
+            console.log('Error playing natural voice:', error);
+            // Fallback to browser voice
+            speakText(data.response);
+        }
     }
 
     function addMessage(sender, message, type) {

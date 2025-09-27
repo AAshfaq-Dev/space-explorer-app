@@ -4,6 +4,7 @@ from flask import Flask, render_template, jsonify, request
 from dotenv import load_dotenv
 from services.n2yo_service import N2YOService  # Allows connection to N2YO API
 from services.gemini_service import GeminiService  # Allows connection to Gemini API
+from services.tts_service import TTSService  # Allows conncetion to Googles TTS API
 
 # Loads environment from env. file
 load_dotenv()
@@ -110,6 +111,49 @@ def ask_ai():
             {
                 "status": "error",
                 "message": "Sorry, something went wrong. Please try again!",
+            }
+        )
+
+
+@app.route("/api/ask-with-voice", methods=["POST"])
+def ask_ai_with_voice():
+    """API endpoint for AI chat with voice response using Googles TTS"""
+    try:
+        # Get question from request
+        data = request.get_json()
+        question = data.get("question", "").strip()
+
+        if not question:
+            return jsonify({"status": "error", "message": "Please ask a question!"})
+
+        # Get conversation history if provided
+        conversation_history = data.get("history", [])
+
+        # Create gemini service and ask question
+        gemini_service = GeminiService()
+        result = gemini_service.ask_question(question, conversation_history)
+
+        # Convert response to natural speech
+        tts_service = TTSService()
+        audio_result = tts_service.text_to_speech(result["response"])
+
+        # Combine text and audio response
+
+        return jsonify(
+            {
+                "status": "success",
+                "response": result["response"],
+                "audio_data": audio_result.get("audio_data"),
+                "audio_available": audio_result["status"] == "success",
+                "source": result["source"],
+            }
+        )
+
+    except Exception as error:
+        return jsonify(
+            {
+                "status": "error",
+                "message": "Sorry, something went wrong. Please try again",
             }
         )
 
