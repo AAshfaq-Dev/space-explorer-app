@@ -1,0 +1,53 @@
+# .dockerignore - Exclude files from Docker build context
+
+# Version control
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Environment files (IMPORTANT - don't include API keys in image!)
+.env
+.env.local
+.env.production
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Development/testing
+test_*.py
+tests/
+debug_*.py
+usage_stats.json
+
+# Documentation
+README.md
+*.md
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
