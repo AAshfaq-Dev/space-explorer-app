@@ -174,5 +174,18 @@ def ask_ai_with_voice():
 # Main executation block
 
 if __name__ == "__main__":
-    # Runs in debug mode for development
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    # Check if we're running locally vs production
+    import os
+
+    # Cloud Run provides PORT environment variable
+    port = int(os.environ.get("PORT", 5000))
+
+    # Use HTTPS only for local development (when PORT is not set by Cloud Run)
+    if os.environ.get("PORT") is None:
+        # Local development with HTTPS
+        app.run(
+            debug=True, host="0.0.0.0", port=port, ssl_context=("cert.pem", "key.pem")
+        )
+    else:
+        # Production (Cloud Run) - no SSL needed
+        app.run(host="0.0.0.0", port=port)

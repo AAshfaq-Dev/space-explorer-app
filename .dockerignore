@@ -41,6 +41,9 @@ tests/
 debug_*.py
 usage_stats.json
 
+# SSL certificates
+*.pem
+
 # Documentation
 README.md
 *.md

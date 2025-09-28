@@ -15,6 +15,9 @@ env/
 # Environment variables (IMPORTANT!)
 .env
 
+# SSL certificates
+*.pem
+
 # Flask
 instance/
 .webassets-cache
