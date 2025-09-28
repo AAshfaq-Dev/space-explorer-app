@@ -1,14 +1,4 @@
-// --- Imports from the DOM Utility Module ---
 // Abstracting the UI helps keep this main logic file clean.
-import {
-    DOM,
-    updateVoiceStatus,
-    resetVoiceButton,
-    showLoading,
-    disableInput,
-    addMessage
-} from './dom-utils.js';
-
 
 // --- Global State Management (Core Application Data) ---
 // These variables manage the application's current working state.
@@ -23,7 +13,7 @@ let isRecording = false;
 /**
  * Stops all ongoing speech synthesis and audio playback.
  */
-export function stopSpeaking() {
+function stopSpeaking() {
     speechSynthesis.cancel();
 
     // Explicitly stop any currently playing audio elements
@@ -118,7 +108,7 @@ function playNaturalVoice(audioData, responseText) {
 /**
  * Toggles the voice recording state (start/stop). Exported for use in chat.html.
  */
-export function toggleVoiceRecording() {
+function toggleVoiceRecording() {
     if (!recognition) {
         alert('Voice recognition not available. Try using Chrome browser.');
         return;
@@ -198,7 +188,7 @@ function initSpeechRecognition() {
  * Handles the 'Enter' key press in the input field. Exported for use in chat.html.
  * @param {Event} event - The keypress event.
  */
-export function handleKeyPress(event) {
+function handleKeyPress(event) {
     if (event.key === 'Enter') {
         askQuestion();
     }
@@ -208,7 +198,7 @@ export function handleKeyPress(event) {
  * Main function to process the user's question, call the API, and handle the response.
  * Exported for use in chat.html.
  */
-export function askQuestion() {
+function askQuestion() {
     const questionText = DOM.questionInput.value.trim();
 
     if (!questionText) {

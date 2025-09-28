@@ -3,7 +3,7 @@
  * Utility object for consistently accessing all required DOM elements.
  * This avoids repeated document.getElementById calls in the main script.
  */
-export const DOM = {
+const DOM = {
     voiceButton: document.getElementById('voice-button'),
     stopSpeakingButton: document.getElementById('stop-speaking-button'),
     voiceStatus: document.getElementById('voice-status'),
@@ -18,7 +18,7 @@ export const DOM = {
  * @param {string} message - The status message to display.
  * @param {string} color - The CSS color code for the text.
  */
-export function updateVoiceStatus(message, color) {
+function updateVoiceStatus(message, color) {
     DOM.voiceStatus.textContent = message;
     DOM.voiceStatus.style.color = color;
 }
@@ -26,7 +26,7 @@ export function updateVoiceStatus(message, color) {
 /**
  * Resets the voice button appearance to the default 'Tap to Talk' state.
  */
-export function resetVoiceButton() {
+function resetVoiceButton() {
     DOM.voiceButton.textContent = '🎤 Tap to Talk';
     DOM.voiceButton.style.backgroundColor = '#FF5722';
 }
@@ -35,7 +35,7 @@ export function resetVoiceButton() {
  * Controls the visibility of the loading indicator.
  * @param {boolean} show - True to show, false to hide.
  */
-export function showLoading(show) {
+function showLoading(show) {
     DOM.loading.style.display = show ? 'block' : 'none';
 }
 
@@ -43,7 +43,7 @@ export function showLoading(show) {
  * Disables or enables the input elements during API processing.
  * @param {boolean} disable - True to disable, false to enable.
  */
-export function disableInput(disable) {
+function disableInput(disable) {
     DOM.questionInput.disabled = disable;
     DOM.askButton.disabled = disable;
     DOM.voiceButton.disabled = disable;
@@ -55,7 +55,7 @@ export function disableInput(disable) {
  * @param {string} message - The content of the message.
  * @param {('user'|'ai'|'error')} type - The type of message for styling.
  */
-export function addMessage(sender, message, type) {
+function addMessage(sender, message, type) {
     const messageDiv = document.createElement('div');
     // Determine the class based on type
     const className = (type === 'user') ? 'user-message' : (type === 'error') ? 'error-message' : 'ai-message';
