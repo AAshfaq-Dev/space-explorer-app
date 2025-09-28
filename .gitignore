@@ -34,3 +34,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Backup folder for old files
+backup_old_files/

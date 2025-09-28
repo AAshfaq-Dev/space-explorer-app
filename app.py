@@ -19,34 +19,11 @@ limiter = create_limiter(app)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 
-@app.route("/test-limit")
-@limiter.limit("3 per minute")  # Very low limit for testing
-def test_limit():
-    """Test route to verify rate limiting works"""
-    return jsonify({"message": "Rate limit test successful", "timestamp": time.time()})
-
-
 # Basic route - home page
 @app.route("/")
 def home():
-    """Home page route - this function runs when someone visits the root URL"""
-    return render_template("index.html", title="Space Explorer")
-
-
-# Test route to verify the app is working
-@app.route("/test")
-def test():
-    """Test endpoint to verify Flask is running"""
-    return jsonify(
-        {
-            "status": "success",
-            "message": "Flask app is running!",
-            "apis_configured": {
-                "n2yo": bool(os.environ.get("N2YO_API_KEY")),
-                "gemini": bool(os.environ.get("GOOGLE_API_KEY")),
-            },
-        }
-    )
+    """Main dashboard - single page with all functionality"""
+    return render_template("dashboard.html", title="Space Explorer's Dashboard")
 
 
 # Imports: brings Flask components and dotenv for environment variables
@@ -55,15 +32,6 @@ def test():
 # @app.route(): Decorator that tells Flask which URL triggers which function
 # render_template(): Renders HTML files from the templates folder
 # jsonify(): Returns JSON responses for API endpoints
-
-
-# Page for Satellites
-
-
-@app.route("/satellites")
-def satellites():
-    """Satellites page - shows satellite tracking interface"""
-    return render_template("satellites.html", title="Satellite Tracker")
 
 
 @app.route("/api/iss-position")
@@ -88,13 +56,6 @@ def get_iss_position():
 # URL parameters: request.args.get() reads optional query parameters
 # Type conversion: type=float ensures coordinates are numbers
 # JSON API: Returns data that JavaScript can consume
-
-
-# Gemini Chat Interface
-@app.route("/chat")
-def chat():
-    """AI Chat page - Q&A Service"""
-    return render_template("chat.html", title="Ask Space Agent")
 
 
 @app.route("/api/ask", methods=["POST"])
@@ -171,8 +132,30 @@ def ask_ai_with_voice():
         )
 
 
-# Main executation block
+# Test route to verify the app is working
+@app.route("/test")
+def test():
+    """Test endpoint to verify Flask is running"""
+    return jsonify(
+        {
+            "status": "success",
+            "message": "Flask app is running!",
+            "apis_configured": {
+                "n2yo": bool(os.environ.get("N2YO_API_KEY")),
+                "gemini": bool(os.environ.get("GOOGLE_API_KEY")),
+            },
+        }
+    )
 
+
+@app.route("/test-limit")
+@limiter.limit("3 per minute")  # Very low limit for testing
+def test_limit():
+    """Test route to verify rate limiting works"""
+    return jsonify({"message": "Rate limit test successful", "timestamp": time.time()})
+
+
+# Main executation block
 if __name__ == "__main__":
     # Check if we're running locally vs production
     import os

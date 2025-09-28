@@ -54,3 +54,6 @@ README.md
 # Temporary files
 *.tmp
 *.temp
+
+# Backup folder for old files
+backup_old_files/
