@@ -14,7 +14,6 @@
         <div class="left-panel">
             <div class="chat-header">
                 <h2>🤖 Isaac's Space Assistant</h2>
-                <p>Ask me anything about space!</p>
             </div>
 
             <div class="voice-controls">
@@ -23,6 +22,11 @@
                 </button>
                 <button id="stop-speaking-button" onclick="stopSpeaking()" class="stop-button" style="display: none;">
                     🔇 Stop Speaking
+                </button>
+                <!-- Test button for playback. Check if playback issue is system or app-->
+                <button id="test-audio-button" onclick="playTestBeep()" class="stop-button"
+                    style="display: inline-block;">
+                    🔊 Test Audio
                 </button>
                 <div id="voice-status" class="voice-status">
                     Ready to listen! Tap the microphone and speak.

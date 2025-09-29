@@ -63,6 +63,42 @@ function speakText(textToSpeak) {
 }
 
 /**
+ * Plays a test beep to verify audio output is working.
+ * Uses Web Audio API to generate a simple tone programmatically.
+ * Useful for troubleshooting speaker/audio output issues.
+ */
+function playTestBeep() {
+    try {
+        // Create audio context (works across browsers)
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioContextClass();
+
+        // Create oscillator (tone generator) and gain (volume control)
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        // Connect: oscillator → gain → speakers
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // Configure the beep
+        oscillator.frequency.value = 440;  // A4 note (440 Hz) - pleasant tone
+        oscillator.type = 'sine';          // Sine wave = smooth, pure tone
+        gainNode.gain.value = 0.5;         // 50% volume - not too loud
+
+        // Play beep for 1 second
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 1);
+
+        console.log('Test beep played successfully');
+
+    } catch (error) {
+        console.error('Failed to play test beep:', error);
+        alert('Audio test failed. Check browser console for details.');
+    }
+}
+
+/**
  * Plays the high-quality natural voice audio from base64 data, with fallback to speakText.
  * Enhanced for dashboard environment with better error handling.
  * @param {string} audioData - Base64 encoded audio data (e.g., MP3).
