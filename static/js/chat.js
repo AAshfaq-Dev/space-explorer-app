@@ -1,5 +1,4 @@
-// --- Global State Management (Dashboard-Compatible Chat System) ---
-// These variables manage the chat application's state within the dashboard
+// --- Global State Management (Enhanced with Request Control) ---
 let conversationHistory = [];
 let recognition = null;
 let speechSynthesis = window.speechSynthesis;
@@ -7,21 +6,62 @@ let isRecording = false;
 let chatInitialized = false;
 let currentAudio = null;
 
+// NEW: Request management variables
+let currentRequestController = null;  // Stores the AbortController for the active request
+let requestCounter = 0;  // Incremental counter to track request order
+let latestRequestId = 0;  // ID of the most recent request sent
+
+
+// --- Function: Cancel All Active Operations ---
+
+/**
+ * Cancels any ongoing API request and stops all audio playback.
+ * This ensures only the latest question is processed.
+ * 
+ * HOW IT WORKS:
+ * 1. Aborts fetch request if one is in progress
+ * 2. Stops Google TTS audio playback
+ * 3. Cancels browser speech synthesis
+ * 4. Resets UI elements to ready state
+ */
+function cancelAllActiveOperations() {
+    console.log('Cancelling all active operations...');
+
+    // Cancel the ongoing fetch request (if any)
+    if (currentRequestController) {
+        currentRequestController.abort();
+        currentRequestController = null;
+        console.log('Previous API request cancelled');
+    }
+
+    // Stop any playing audio immediately
+    stopSpeaking();
+
+    // Reset UI to ready state
+    showLoading(false);
+    disableInput(false);
+}
+
 
 // --- Function: Text-to-Speech (TTS) and Audio Playback ---
 
 /**
  * Stops all ongoing speech synthesis and audio playback.
- * Updated for dashboard compatibility
+ * Enhanced to work with the cancellation system.
  */
 function stopSpeaking() {
     // Stop browser TTS
-    speechSynthesis.cancel();
+    if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+        console.log('Browser TTS cancelled');
+    }
 
     // Stop current Google TTS audio if it exists
     if (currentAudio) {
         currentAudio.pause();
+        currentAudio.currentTime = 0;  // Reset to beginning
         currentAudio = null;
+        console.log('Google TTS audio stopped');
     }
 
     // Hide stop button
@@ -32,9 +72,18 @@ function stopSpeaking() {
 
 /**
  * Uses the browser's native Speech Synthesis for basic text-to-speech fallback.
+ * Enhanced with request ID tracking to prevent stale audio.
+ * 
  * @param {string} textToSpeak - The text to be converted to speech.
+ * @param {number} requestId - The ID of the request that generated this speech.
  */
-function speakText(textToSpeak) {
+function speakText(textToSpeak, requestId) {
+    // CRITICAL CHECK: Only speak if this is still the latest request
+    if (requestId !== latestRequestId) {
+        console.log(`Skipping stale TTS (request ${requestId} vs latest ${latestRequestId})`);
+        return;
+    }
+
     speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
 
@@ -65,28 +114,22 @@ function speakText(textToSpeak) {
 /**
  * Plays a test beep to verify audio output is working.
  * Uses Web Audio API to generate a simple tone programmatically.
- * Useful for troubleshooting speaker/audio output issues.
  */
 function playTestBeep() {
     try {
-        // Create audio context (works across browsers)
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         const audioContext = new AudioContextClass();
 
-        // Create oscillator (tone generator) and gain (volume control)
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
 
-        // Connect: oscillator → gain → speakers
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
 
-        // Configure the beep
-        oscillator.frequency.value = 440;  // A4 note (440 Hz) - pleasant tone
-        oscillator.type = 'sine';          // Sine wave = smooth, pure tone
-        gainNode.gain.value = 0.5;         // 50% volume - not too loud
+        oscillator.frequency.value = 440;
+        oscillator.type = 'sine';
+        gainNode.gain.value = 0.5;
 
-        // Play beep for 1 second
         oscillator.start();
         oscillator.stop(audioContext.currentTime + 1);
 
@@ -99,16 +142,23 @@ function playTestBeep() {
 }
 
 /**
- * Plays the high-quality natural voice audio from base64 data, with fallback to speakText.
- * Enhanced for dashboard environment with better error handling.
+ * Plays the high-quality natural voice audio from base64 data.
+ * Enhanced with request ID tracking to prevent stale audio playback.
+ * 
  * @param {string} audioData - Base64 encoded audio data (e.g., MP3).
  * @param {string} responseText - The original text response for the fallback.
+ * @param {number} requestId - The ID of the request that generated this audio.
  */
-function playNaturalVoice(audioData, responseText) {
-    try {
-        speechSynthesis.cancel(); // Prioritize the natural voice
+function playNaturalVoice(audioData, responseText, requestId) {
+    // CRITICAL CHECK: Only play if this is still the latest request
+    if (requestId !== latestRequestId) {
+        console.log(`Skipping stale audio (request ${requestId} vs latest ${latestRequestId})`);
+        return;
+    }
 
-        // Explicit, clear steps for converting Base64 to a Blob
+    try {
+        speechSynthesis.cancel();
+
         const audioBytes = atob(audioData);
         const arrayBuffer = new ArrayBuffer(audioBytes.length);
         const uint8Array = new Uint8Array(arrayBuffer);
@@ -121,7 +171,7 @@ function playNaturalVoice(audioData, responseText) {
         const audioUrl = URL.createObjectURL(audioBlob);
 
         const audio = new Audio(audioUrl);
-        currentAudio = audio;  // Track this audio globally
+        currentAudio = audio;
         audio.preload = 'auto';
 
         if (DOM.stopSpeakingButton) {
@@ -133,14 +183,14 @@ function playNaturalVoice(audioData, responseText) {
                 DOM.stopSpeakingButton.style.display = 'none';
             }
             currentAudio = null;
-            URL.revokeObjectURL(audioUrl); // Essential memory cleanup
+            URL.revokeObjectURL(audioUrl);
         };
 
         audio.onended = cleanupAndHideButton;
         audio.onerror = (e) => {
             console.error('Natural voice playback failed. Falling back to browser TTS.', e);
             cleanupAndHideButton();
-            speakText(responseText);
+            speakText(responseText, requestId);  // Pass requestId to fallback
         };
 
         const playPromise = audio.play();
@@ -148,20 +198,21 @@ function playNaturalVoice(audioData, responseText) {
             playPromise.catch(error => {
                 console.warn('Audio play failed (promise error).', error);
                 cleanupAndHideButton();
-                speakText(responseText); // Fallback
+                speakText(responseText, requestId);  // Pass requestId to fallback
             });
         }
     } catch (error) {
         console.error('Error processing or playing natural voice data:', error);
-        speakText(responseText);
+        speakText(responseText, requestId);  // Pass requestId to fallback
     }
 }
+
 
 // --- Function: Voice Recognition Setup and Control ---
 
 /**
  * Toggles the voice recording state (start/stop). 
- * Updated for dashboard compatibility with enhanced error handling.
+ * Enhanced to cancel previous operations before starting new recording.
  */
 function toggleVoiceRecording() {
     if (!recognition) {
@@ -171,38 +222,38 @@ function toggleVoiceRecording() {
 
     if (isRecording) {
         recognition.stop();
-        updateVoiceStatus('🛑 Stopped listening', '#9E9E9E');
+        updateVoiceStatus('Stopped listening', '#9E9E9E');
     } else {
+        // IMPORTANT: Cancel any ongoing operations before starting new recording
+        cancelAllActiveOperations();
+
         try {
             recognition.start();
         } catch (error) {
             console.error('Error starting recognition:', error);
-            updateVoiceStatus('❌ Voice not available. Try reloading page.', '#f44336');
+            updateVoiceStatus('Voice not available. Try reloading page.', '#f44336');
         }
     }
 }
 
 /**
  * Initializes webkitSpeechRecognition and sets up event handlers.
- * Enhanced for dashboard environment.
  */
 function initSpeechRecognition() {
     const isSpeechSupported = 'webkitSpeechRecognition' in window;
 
     if (isSpeechSupported) {
-        // Explicit configuration for the speech recognition object
         recognition = new webkitSpeechRecognition();
         recognition.lang = 'en-US';
         recognition.continuous = false;
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
 
-        // --- Event handlers for the voice recording lifecycle ---
         recognition.onstart = () => {
             isRecording = true;
-            updateVoiceStatus('🎤 Listening... speak now!', '#FF5722');
+            updateVoiceStatus('Listening... speak now!', '#FF5722');
             if (DOM.voiceButton) {
-                DOM.voiceButton.textContent = '🔴 Tap to Stop';
+                DOM.voiceButton.textContent = 'Tap to Stop';
                 DOM.voiceButton.style.backgroundColor = '#f44336';
             }
         };
@@ -214,7 +265,7 @@ function initSpeechRecognition() {
             if (DOM.questionInput) {
                 DOM.questionInput.value = finalTranscript;
             }
-            updateVoiceStatus('✅ Got it: "' + finalTranscript + '"', '#4CAF50');
+            updateVoiceStatus('Got it: "' + finalTranscript + '"', '#4CAF50');
 
             // Automatically ask the question after a short delay
             setTimeout(askQuestion, 1500);
@@ -222,19 +273,19 @@ function initSpeechRecognition() {
 
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
-            updateVoiceStatus('❌ Couldn\'t hear that. Try again!', '#f44336');
+            updateVoiceStatus('Could not hear that. Try again!', '#f44336');
             resetVoiceButton();
         };
 
         recognition.onend = () => {
             isRecording = false;
-            if (DOM.voiceButton && DOM.voiceButton.textContent === '🔴 Tap to Stop') {
-                updateVoiceStatus('🤔 Processing what you said...', '#FF9800');
+            if (DOM.voiceButton && DOM.voiceButton.textContent === 'Tap to Stop') {
+                updateVoiceStatus('Processing what you said...', '#FF9800');
             }
             resetVoiceButton();
         };
 
-        updateVoiceStatus('✅ Voice ready! Tap microphone to start.', '#4CAF50');
+        updateVoiceStatus('Voice ready! Tap microphone to start.', '#4CAF50');
         console.log('Speech recognition initialized successfully');
     } else {
         if (DOM.voiceButton) {
@@ -245,7 +296,8 @@ function initSpeechRecognition() {
     }
 }
 
-// --- Function: Chat Interaction and API Handling ---
+
+// --- Function: Chat Interaction and API Handling (Enhanced) ---
 
 /**
  * Handles the 'Enter' key press in the input field.
@@ -259,7 +311,13 @@ function handleKeyPress(event) {
 
 /**
  * Main function to process the user's question, call the API, and handle the response.
- * Enhanced for dashboard environment with better error handling.
+ * ENHANCED with request cancellation and priority management.
+ * 
+ * KEY FEATURES:
+ * - Cancels previous requests before starting new one
+ * - Uses AbortController for fetch cancellation
+ * - Tracks request IDs to ignore stale responses
+ * - Stops all audio playback immediately
  */
 function askQuestion() {
     if (!DOM.questionInput) {
@@ -270,39 +328,68 @@ function askQuestion() {
     const questionText = DOM.questionInput.value.trim();
 
     if (!questionText) {
-        speakText('Please ask me a question!');
+        speakText('Please ask me a question!', ++requestCounter);
         return;
     }
 
-    // --- 1. UI Update and Input Management ---
+    // --- STEP 1: Cancel all previous operations ---
+    // This is the critical fix - immediately stop everything from previous requests
+    cancelAllActiveOperations();
+
+    // --- STEP 2: Create new request tracking ---
+    // Increment counter and store as the latest request
+    requestCounter++;
+    const thisRequestId = requestCounter;
+    latestRequestId = thisRequestId;
+
+    // Create new AbortController for this request
+    currentRequestController = new AbortController();
+    const signal = currentRequestController.signal;
+
+    console.log(`Starting new request ${thisRequestId}, cancelling any previous requests`);
+
+    // --- STEP 3: UI Update and Input Management ---
     addMessage('You', questionText, 'user');
     DOM.questionInput.value = '';
     showLoading(true);
     disableInput(true);
 
-    // --- 2. API Call Setup ---
+    // --- STEP 4: API Call Setup ---
     const apiEndpoint = '/api/ask-with-voice';
     const postBody = {
         question: questionText,
-        history: conversationHistory // Send the state for context
+        history: conversationHistory
     };
 
-    // --- 3. Execute API Call ---
+    // --- STEP 5: Execute API Call with AbortSignal ---
     fetch(apiEndpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(postBody)
+        body: JSON.stringify(postBody),
+        signal: signal  // CRITICAL: This allows request cancellation
     })
         .then(response => {
+            // Check if this response is still relevant
+            if (thisRequestId !== latestRequestId) {
+                console.log(`Ignoring stale response (request ${thisRequestId})`);
+                return null;
+            }
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            // --- 4. Handle successful response and UI cleanup ---
+            // Double-check this is still the latest request before processing
+            if (!data || thisRequestId !== latestRequestId) {
+                console.log(`Skipping processing for stale request ${thisRequestId}`);
+                return;
+            }
+
+            // --- STEP 6: Handle successful response and UI cleanup ---
             showLoading(false);
             disableInput(false);
 
@@ -314,12 +401,12 @@ function askQuestion() {
                 const hasNaturalAudio = data.audio_available && data.audio_data;
 
                 if (hasNaturalAudio) {
-                    playNaturalVoice(data.audio_data, aiResponse);
+                    playNaturalVoice(data.audio_data, aiResponse, thisRequestId);
                 } else {
-                    speakText(aiResponse);
+                    speakText(aiResponse, thisRequestId);
                 }
 
-                // --- 5. Update Conversation History (State Management) ---
+                // --- STEP 7: Update Conversation History ---
                 conversationHistory.push({
                     question: questionText,
                     response: aiResponse
@@ -331,28 +418,36 @@ function askQuestion() {
                     conversationHistory = conversationHistory.slice(conversationHistory.length - MAX_HISTORY_LENGTH);
                 }
             } else {
-                // Handle functional error message from the API
                 const errorMessage = data.message || 'Sorry, I had trouble with that question.';
                 addMessage('Space AI', errorMessage, 'error');
-                speakText(errorMessage);
+                speakText(errorMessage, thisRequestId);
             }
         })
         .catch(error => {
-            // --- 6. Handle network/fetch errors ---
-            showLoading(false);
-            disableInput(false);
-            const errorMessage = 'Oops! Something went wrong with the network. Please try again.';
-            addMessage('Space AI', errorMessage, 'error');
-            speakText(errorMessage);
-            console.error('Fetch Error:', error);
+            // --- STEP 8: Handle network/fetch errors ---
+            // Ignore errors from aborted requests (this is expected behavior)
+            if (error.name === 'AbortError') {
+                console.log(`Request ${thisRequestId} was cancelled (expected behavior)`);
+                return;
+            }
+
+            // Only show error if this was the latest request
+            if (thisRequestId === latestRequestId) {
+                showLoading(false);
+                disableInput(false);
+                const errorMessage = 'Oops! Something went wrong with the network. Please try again.';
+                addMessage('Space AI', errorMessage, 'error');
+                speakText(errorMessage, thisRequestId);
+                console.error('Fetch Error:', error);
+            }
         });
 }
+
 
 // --- Chat Initialization for Dashboard ---
 
 /**
  * Initializes the chat system within the dashboard environment
- * This ensures chat is ready when the dashboard loads
  */
 function initializeChatSystem() {
     if (chatInitialized) {
@@ -362,19 +457,15 @@ function initializeChatSystem() {
 
     console.log('Initializing chat system for dashboard...');
 
-    // Validate required elements are present
     if (!validateDashboardElements()) {
         console.error('Cannot initialize chat - missing required elements');
-        setTimeout(initializeChatSystem, 1000); // Retry after 1 second
+        setTimeout(initializeChatSystem, 1000);
         return;
     }
 
-    // Initialize speech recognition
     initSpeechRecognition();
 
-    // Add welcome message if chat is empty
     if (DOM.chatMessages && DOM.chatMessages.children.length <= 1) {
-        // Only add if there's just the initial message or no messages
         console.log('Chat system ready in dashboard mode');
     }
 
@@ -382,21 +473,14 @@ function initializeChatSystem() {
     console.log('Chat system initialization complete');
 }
 
+
 // --- Event Listeners for Dashboard Integration ---
 
-/**
- * Initialize chat system when DOM is ready
- * This works with the dashboard's initialization sequence
- */
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, preparing chat system...');
-    // Small delay to ensure dashboard elements are ready
     setTimeout(initializeChatSystem, 500);
 });
 
-/**
- * Also initialize when window loads (backup)
- */
 window.addEventListener('load', () => {
     if (!chatInitialized) {
         console.log('Window loaded, initializing chat system...');

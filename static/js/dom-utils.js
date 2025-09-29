@@ -111,7 +111,7 @@ function updateISSLoadingState(isLoading) {
 function validateDashboardElements() {
     const requiredElements = [
         'voice-button', 'question-input', 'ask-button',
-        'chat-messages', 'current-time', 'iss-info'
+        'chat-messages'//, 'current-time', 'iss-info'
     ];
 
     const missingElements = [];
