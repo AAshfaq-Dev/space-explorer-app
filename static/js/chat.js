@@ -129,7 +129,7 @@ function playNaturalVoice(audioData, responseText) {
  */
 function toggleVoiceRecording() {
     if (!recognition) {
-        alert('Voice recognition not available. Try using Chrome browser.');
+        alert('Voice recognition not available. Try using a different browser.');
         return;
     }
 

@@ -13,7 +13,7 @@
         <!-- Left Panel - AI Chat (Main Focus) -->
         <div class="left-panel">
             <div class="chat-header">
-                <h2>🤖 Space AI Assistant</h2>
+                <h2>🤖 Isaac's Space Assistant</h2>
                 <p>Ask me anything about space!</p>
             </div>
 
@@ -32,8 +32,7 @@
             <div id="chat-container" class="chat-container">
                 <div id="chat-messages">
                     <div class="message ai-message">
-                        <strong>Space AI:</strong> Hi there, space explorer! Ask me anything about the universe -
-                        planets, satellites, astronauts, or how things work in space!
+                        <strong>Space Assistant:</strong>
                     </div>
                 </div>
             </div>
@@ -51,44 +50,11 @@
 
         <!-- Right Panel - Space Information Center -->
         <div class="right-panel">
-            <!-- Current Time Widget -->
-            <div class="space-widget time-widget">
-                <h3>Mission Control Time</h3>
-                <div id="current-time"></div>
-                <div id="current-date"></div>
-            </div>
-
-            <!-- ISS Status Widget -->
-            <div class="space-widget iss-widget">
-                <h3>🛰️ ISS Status</h3>
-                <button onclick="trackISS()" id="track-iss-button">Track ISS</button>
-                <div id="iss-loading" class="widget-loading" style="display: none;">
-                    <p>🔄 Getting ISS position...</p>
-                </div>
-                <div id="iss-info">
-                    <p>Click "Track ISS" to get current position</p>
-                </div>
-            </div>
-
-            <!-- Planet Information Widget -->
-            <div class="space-widget planet-widget">
-                <h3>🪐 Planetary Status</h3>
-                <div id="planet-info">
-                    <p>Select a planet to explore:</p>
-                    <div class="planet-buttons">
-                        <button onclick="showPlanetInfo('mars')">Mars</button>
-                        <button onclick="showPlanetInfo('jupiter')">Jupiter</button>
-                        <button onclick="showPlanetInfo('saturn')">Saturn</button>
-                    </div>
-                    <div id="planet-display"></div>
-                </div>
-            </div>
-
-            <!-- Orbit Visualization Widget -->
-            <div class="space-widget orbit-widget">
-                <h3>🌌 Solar System</h3>
-                <div id="orbit-display">
-                    <p>Simple orbit visualization coming soon...</p>
+            <!-- Images Visualization Widget -->
+            <div class="space-widget images-search-widget">
+                <h3>Space Pictures</h3>
+                <div id="images-search-widget">
+                    <p></p>
                 </div>
             </div>
         </div>
