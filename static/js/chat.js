@@ -1,4 +1,4 @@
-// --- Global State Management (Enhanced with Request Control) ---
+// --- Global State Management ---
 let conversationHistory = [];
 let recognition = null;
 let speechSynthesis = window.speechSynthesis;
@@ -6,7 +6,7 @@ let isRecording = false;
 let chatInitialized = false;
 let currentAudio = null;
 
-// NEW: Request management variables
+// Request management variables
 let currentRequestController = null;  // Stores the AbortController for the active request
 let requestCounter = 0;  // Incremental counter to track request order
 let latestRequestId = 0;  // ID of the most recent request sent
@@ -353,6 +353,7 @@ function askQuestion() {
     DOM.questionInput.value = '';
     showLoading(true);
     disableInput(true);
+    updateVoiceStatus(`Thinking about: "${questionText}"`, '#FF9800');
 
     // --- STEP 4: API Call Setup ---
     const apiEndpoint = '/api/ask-with-voice';
@@ -396,6 +397,7 @@ function askQuestion() {
             if (data.status === 'success') {
                 const aiResponse = data.response;
                 addMessage('Space AI', aiResponse, 'ai');
+                updateVoiceStatus('Ready! Ask me anything about space.', '#4CAF50');
 
                 // Play audio if available, otherwise use browser TTS
                 const hasNaturalAudio = data.audio_available && data.audio_data;
@@ -437,6 +439,7 @@ function askQuestion() {
                 disableInput(false);
                 const errorMessage = 'Oops! Something went wrong with the network. Please try again.';
                 addMessage('Space AI', errorMessage, 'error');
+                updateVoiceStatus('Ready! Ask me anything about space.', '#4CAF50');
                 speakText(errorMessage, thisRequestId);
                 console.error('Fetch Error:', error);
             }
