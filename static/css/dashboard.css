@@ -4,10 +4,102 @@ How things look (colors, sizes, fonts, spacing)
 Layout and positioning
 Visual states
 Example: .voice-status--ready { color: #4CAF50; } says "ready status is green"
+*/
 
-/* Dashboard Layout - Optimized for iPads and Desktops */
+/* ============================================
+   TABLE OF CONTENTS
+   ============================================
+   1. CSS Variables
+   2. Global Reset and Base Styles
+   3. Dashboard Layout Structure
+   4. Left Panel - Chat Interface
+      4.1 Chat Header
+      4.2 Voice Controls and Status
+      4.3 Chat Container and Messages
+      4.4 Input Area
+   5. Right Panel - Space Widgets
+      5.1 Base Widget Styles
+      5.2 Time Widget
+      5.3 ISS Widget
+      5.4 Orbit Widget
+   6. Loading States
+   7. Responsive Design for Tablets
+   ============================================ */
 
-/* Global Reset and Base Styles */
+
+/* ============================================
+   1. CSS VARIABLES
+   Define colors and spacing once, use everywhere
+   ============================================ */
+
+:root {
+    /* ---- Primary Colors ---- */
+    --color-space-black: #0a0e1a;
+    /* Main background */
+    --color-dark-blue: #1a1f2e;
+    /* Left panel background */
+    --color-medium-gray: #2d3748;
+    /* Cards and containers */
+    --color-widget-hover: #4a5568;
+    /* Hover states */
+
+    /* ---- Text Colors ---- */
+    --color-white: #ffffff;
+    --color-light-gray: #a0aec0;
+    /* Secondary text */
+
+    /* ---- Action Colors ---- */
+    --color-orange: #FF5722;
+    /* Primary buttons */
+    --color-orange-hover: #E64A19;
+    --color-green: #4CAF50;
+    /* Success/ISS button */
+    --color-green-hover: #45a049;
+    --color-red: #f44336;
+    /* Errors and recording */
+    --color-red-light: #fc8181;
+    /* Error borders */
+    --color-amber: #FF9800;
+    /* Processing/warnings */
+    --color-blue: #2b6cb0;
+    /* User messages */
+    --color-blue-light: #63b3ed;
+    /* User message borders */
+    --color-gray: #9E9E9E;
+    /* Disabled/neutral */
+    --color-pink: #fbb6ce;
+    /* Loading states */
+
+    /* ---- Spacing (for padding and margins) ---- */
+    --space-xs: 5px;
+    --space-sm: 10px;
+    --space-md: 15px;
+    --space-lg: 20px;
+    --space-xl: 25px;
+
+    /* ---- Border Radius ---- */
+    --radius-small: 6px;
+    --radius-medium: 8px;
+    --radius-large: 10px;
+    --radius-xl: 12px;
+    --radius-pill: 25px;
+    --radius-circle: 50px;
+
+    /* ---- Typography ---- */
+    --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-size-small: 14px;
+    --font-size-base: 16px;
+    --font-size-large: 18px;
+    --font-size-heading: 24px;
+    --font-size-time: 28px;
+}
+
+
+/* ============================================
+   2. GLOBAL RESET AND BASE STYLES
+   Foundation styles for all elements
+   ============================================ */
+
 * {
     margin: 0;
     padding: 0;
@@ -15,14 +107,19 @@ Example: .voice-status--ready { color: #4CAF50; } says "ready status is green"
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #0a0e1a;
-    color: #ffffff;
+    font-family: var(--font-main);
+    background-color: var(--color-space-black);
+    color: var(--color-white);
     height: 100vh;
     overflow: hidden;
 }
 
-/* Main Dashboard Container */
+
+/* ============================================
+   3. DASHBOARD LAYOUT STRUCTURE
+   Main container and panel arrangement
+   ============================================ */
+
 .dashboard-container {
     display: flex;
     height: 100vh;
@@ -32,160 +129,198 @@ body {
 /* Left Panel - AI Chat (Main Focus) */
 .left-panel {
     flex: 2;
-    background-color: #1a1f2e;
-    padding: 20px;
+    background-color: var(--color-dark-blue);
+    padding: var(--space-lg);
     display: flex;
     flex-direction: column;
-    border-right: 2px solid #2d3748;
+    border-right: 2px solid var(--color-medium-gray);
     overflow: hidden;
 }
 
+/* Right Panel - Space Information Center */
+.right-panel {
+    flex: 1;
+    background-color: #1e2532;
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    overflow-y: auto;
+}
+
+
+/* ============================================
+   4. LEFT PANEL - CHAT INTERFACE
+   AI chat component with voice controls
+   ============================================ */
+
+/* ---- 4.1 Chat Header ---- */
+
 .chat-header {
     text-align: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #2d3748;
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--color-medium-gray);
 }
 
 .chat-header h2 {
-    color: #ffffff;
-    margin-bottom: 5px;
-    font-size: 24px;
+    color: var(--color-white);
+    margin-bottom: var(--space-xs);
+    font-size: var(--font-size-heading);
 }
 
 .chat-header p {
-    color: #a0aec0;
-    font-size: 14px;
+    color: var(--color-light-gray);
+    font-size: var(--font-size-small);
 }
 
-/* Voice Controls */
+
+/* ---- 4.2 Voice Controls and Status ---- */
+
 .voice-controls {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: var(--space-lg);
 }
 
+/* Main voice button (microphone) */
 #voice-button {
-    background-color: #FF5722;
+    background-color: var(--color-orange);
     color: white;
-    padding: 12px 25px;
+    padding: 12px var(--space-xl);
     border: none;
-    border-radius: 50px;
+    border-radius: var(--radius-circle);
     cursor: pointer;
-    font-size: 16px;
-    margin: 10px;
+    font-size: var(--font-size-base);
+    margin: var(--space-sm);
     transition: all 0.3s ease;
 }
 
 #voice-button:hover {
-    background-color: #E64A19;
+    background-color: var(--color-orange-hover);
     transform: scale(1.05);
 }
 
+/* Recording state - button turns red when listening */
 #voice-button.recording {
-    background-color: #f44336;
+    background-color: var(--color-red);
 }
 
+/* Stop speaking button */
 .stop-button {
-    background-color: #9E9E9E;
+    background-color: var(--color-gray);
     color: white;
     padding: 8px 16px;
     border: none;
-    border-radius: 25px;
+    border-radius: var(--radius-pill);
     cursor: pointer;
-    margin-left: 10px;
+    margin-left: var(--space-sm);
 }
 
-/* Voice status states */
+/* Voice status message with different states */
 .voice-status {
-    margin: 10px 0;
+    margin: var(--space-sm) 0;
     font-weight: bold;
-    color: #ffffff;
-    font-size: 14px;
+    color: var(--color-white);
+    font-size: var(--font-size-small);
 }
 
+/* Status state colors */
 .voice-status--ready {
-    color: #4CAF50;
+    color: var(--color-green);
 }
 
 .voice-status--listening {
-    color: #FF5722;
+    color: var(--color-orange);
 }
 
 .voice-status--processing {
-    color: #FF9800;
+    color: var(--color-amber);
 }
 
 .voice-status--error {
-    color: #f44336;
+    color: var(--color-red);
 }
 
 .voice-status--stopped {
-    color: #9E9E9E;
+    color: var(--color-gray);
 }
 
-/* Chat Container */
+
+/* ---- 4.3 Chat Container and Messages ---- */
+
+/* Scrollable chat messages area */
 .chat-container {
     flex: 1;
-    background-color: #2d3748;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 20px;
+    background-color: var(--color-medium-gray);
+    border-radius: var(--radius-large);
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
     overflow-y: auto;
     min-height: 300px;
 }
 
+/* Individual message bubble */
 .message {
     padding: 12px;
-    border-radius: 8px;
-    margin: 10px 0;
+    border-radius: var(--radius-medium);
+    margin: var(--space-sm) 0;
     word-wrap: break-word;
     line-height: 1.4;
 }
 
+/* AI response message */
 .ai-message {
-    background-color: #4a5568;
-    border-left: 4px solid #ffffff;
+    background-color: var(--color-widget-hover);
+    border-left: 4px solid var(--color-white);
 }
 
+/* User question message */
 .user-message {
-    background-color: #2b6cb0;
-    border-left: 4px solid #63b3ed;
+    background-color: var(--color-blue);
+    border-left: 4px solid var(--color-blue-light);
 }
 
+/* Error message */
 .error-message {
     background-color: #c53030;
-    border-left: 4px solid #fc8181;
+    border-left: 4px solid var(--color-red-light);
 }
 
-/* Input Area */
+
+/* ---- 4.4 Input Area ---- */
+
+/* Container for text input and ask button */
 .input-area {
     display: flex;
-    gap: 10px;
+    gap: var(--space-sm);
 }
 
+/* Text input field */
 #question-input {
     flex: 1;
     padding: 12px;
-    border: 2px solid #4a5568;
-    border-radius: 8px;
-    background-color: #2d3748;
+    border: 2px solid var(--color-widget-hover);
+    border-radius: var(--radius-medium);
+    background-color: var(--color-medium-gray);
     color: white;
-    font-size: 16px;
+    font-size: var(--font-size-base);
 }
 
+/* Focus state for input field */
 #question-input:focus {
     outline: none;
-    border-color: #ffffff;
+    border-color: var(--color-white);
 }
 
+/* Ask button */
 .ask-button {
-    background-color: #ffffff;
+    background-color: var(--color-white);
     color: rgb(0, 0, 0);
-    padding: 12px 20px;
+    padding: 12px var(--space-lg);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-medium);
     cursor: pointer;
-    font-size: 16px;
+    font-size: var(--font-size-base);
     transition: background-color 0.3s ease;
 }
 
@@ -193,119 +328,145 @@ body {
     background-color: #cde0ce;
 }
 
-/* Right Panel - Space Information Center */
-.right-panel {
-    flex: 1;
-    background-color: #1e2532;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    overflow-y: auto;
-}
 
-/* Space Widgets */
+/* ============================================
+   5. RIGHT PANEL - SPACE WIDGETS
+   Information cards for space data
+   ============================================ */
+
+/* ---- 5.1 Base Widget Styles ---- */
+
+/* Shared styles for all space widgets */
 .space-widget {
-    background-color: #2d3748;
-    border-radius: 12px;
-    padding: 15px;
-    border: 1px solid #4a5568;
+    background-color: var(--color-medium-gray);
+    border-radius: var(--radius-xl);
+    padding: var(--space-md);
+    border: 1px solid var(--color-widget-hover);
     transition: transform 0.2s ease;
 }
 
+/* Hover effect - slight lift */
 .space-widget:hover {
     transform: translateY(-2px);
-    border-color: #ffffff;
+    border-color: var(--color-white);
 }
 
+/* Widget heading */
 .space-widget h3 {
-    color: #ffffff;
-    margin-bottom: 15px;
-    font-size: 18px;
+    color: var(--color-white);
+    margin-bottom: var(--space-md);
+    font-size: var(--font-size-large);
     text-align: center;
 }
 
-/* Time Widget */
+
+/* ---- 5.2 Time Widget ---- */
+
 .time-widget {
     text-align: center;
 }
 
+/* Large time display (e.g., "10:30:45 PM") */
 #current-time {
-    font-size: 28px;
+    font-size: var(--font-size-time);
     font-weight: bold;
-    color: #63b3ed;
-    margin-bottom: 5px;
+    color: var(--color-blue-light);
+    margin-bottom: var(--space-xs);
 }
 
+/* Date display (e.g., "Monday, January 1, 2025") */
 #current-date {
-    font-size: 16px;
-    color: #a0aec0;
+    font-size: var(--font-size-base);
+    color: var(--color-light-gray);
 }
 
-/* ISS Widget */
+
+/* ---- 5.3 ISS Widget ---- */
+
 .iss-widget {
     text-align: center;
 }
 
+/* Track ISS button */
 #track-iss-button {
-    background-color: #4CAF50;
+    background-color: var(--color-green);
     color: white;
-    padding: 10px 20px;
+    padding: var(--space-sm) var(--space-lg);
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius-medium);
     cursor: pointer;
-    margin-bottom: 15px;
+    margin-bottom: var(--space-md);
     transition: background-color 0.3s ease;
 }
 
 #track-iss-button:hover {
-    background-color: #45a049;
+    background-color: var(--color-green-hover);
 }
 
+/* Loading indicator text */
 .widget-loading {
-    color: #fbb6ce;
+    color: var(--color-pink);
     font-style: italic;
 }
 
+/* ISS information display box */
 #iss-info {
-    background-color: #4a5568;
-    padding: 10px;
-    border-radius: 6px;
-    font-size: 14px;
+    background-color: var(--color-widget-hover);
+    padding: var(--space-sm);
+    border-radius: var(--radius-small);
+    font-size: var(--font-size-small);
 }
 
-/* Orbit Widget */
+
+/* ---- 5.4 Orbit Widget ---- */
+
+/* Placeholder for future orbit visualization */
 .orbit-widget {
     text-align: center;
     min-height: 120px;
 }
 
-/* Loading States */
+
+/* ============================================
+   6. LOADING STATES
+   Indicators for async operations
+   ============================================ */
+
 .loading {
     text-align: center;
-    color: #fbb6ce;
+    color: var(--color-pink);
     font-style: italic;
-    padding: 10px;
+    padding: var(--space-sm);
 }
 
-/* Responsive Design for Tablets */
+
+/* ============================================
+   7. RESPONSIVE DESIGN FOR TABLETS
+   Layout adjustments for smaller screens
+   ============================================ */
+
 @media (max-width: 1024px) {
+
+    /* Stack panels vertically on tablets */
     .dashboard-container {
         flex-direction: column;
     }
 
+    /* Left panel takes available space */
     .left-panel {
         flex: 1;
         border-right: none;
-        border-bottom: 2px solid #2d3748;
+        border-bottom: 2px solid var(--color-medium-gray);
     }
 
+    /* Right panel becomes horizontal scrolling bar */
     .right-panel {
         flex: 0 0 200px;
         flex-direction: row;
         overflow-x: auto;
     }
 
+    /* Ensure widgets don't shrink too small */
     .space-widget {
         min-width: 200px;
     }
