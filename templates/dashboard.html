@@ -1,10 +1,12 @@
-<!--HTML Manages Structure/Content
-
-Defines what exists on the page
-Semantic meaning (this is a button, this is a heading, this is a form)
-The "skeleton" or blueprint
-Example: <button id="voice-button"> says "there's a button here"
-    -->
+<!--
+============================================
+DASHBOARD.HTML - Space Explorer Main Interface
+============================================
+Structure: Two-panel layout
+- Left: AI chat with voice controls
+- Right: Space information widgets
+============================================
+-->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -18,75 +20,145 @@ Example: <button id="voice-button"> says "there's a button here"
 </head>
 
 <body>
+    <!-- ==========================================
+         MAIN DASHBOARD CONTAINER
+         ========================================== -->
     <div class="dashboard-container">
-        <!-- Left Panel - AI Chat (Main Focus) -->
+
+        <!-- ==========================================
+             LEFT PANEL - AI CHAT INTERFACE
+             ========================================== -->
         <div class="left-panel">
+
+            <!-- Chat Header -->
             <div class="chat-header">
                 <h2>🤖 Isaac's Space Assistant</h2>
             </div>
 
+            <!-- ==========================================
+                 VOICE CONTROLS SECTION
+                 Buttons managed by chat.js
+                 ========================================== -->
             <div class="voice-controls">
-                <button id="voice-button" onclick="toggleVoiceRecording()">
+
+                <!-- Primary voice button (starts/stops recording) -->
+                <button id="voice-button" onclick="toggleVoiceRecording()" data-default-text="🎤 Tap to Talk"
+                    data-recording-text="🎤 Tap to Stop">
                     🎤 Tap to Talk
                 </button>
+
+                <!-- Stop speaking button (hidden by default) -->
                 <button id="stop-speaking-button" onclick="stopSpeaking()" class="stop-button" style="display: none;">
                     🔇 Stop Speaking
                 </button>
-                <!-- Test button for playback. Check if playback issue is system or app-->
-                <button id="test-audio-button" onclick="playTestBeep()" class="stop-button"
-                    style="display: inline-block;">
+
+                <!-- Test audio button (for debugging audio issues) -->
+                <button id="test-audio-button" onclick="playTestBeep()" class="stop-button">
                     🔊 Test Audio
                 </button>
+
+                <!-- Voice status message (updated by chat.js) -->
                 <div id="voice-status" class="voice-status">
                     Ready to listen! Tap the microphone and speak.
                 </div>
             </div>
 
+            <!-- ==========================================
+                 CHAT MESSAGES CONTAINER
+                 Messages added dynamically by chat.js
+                 ========================================== -->
             <div id="chat-container" class="chat-container">
                 <div id="chat-messages">
+                    <!-- Initial AI greeting -->
                     <div class="message ai-message">
                         <strong>Space AI:</strong>
                     </div>
                 </div>
             </div>
 
+            <!-- ==========================================
+                 TEXT INPUT AREA
+                 Manual question entry
+                 ========================================== -->
             <div class="input-area">
+                <!-- Question text input (handles Enter key via chat.js) -->
                 <input type="text" id="question-input" placeholder="Ask about space... or use voice!"
                     onkeypress="handleKeyPress(event)">
-                <button onclick="askQuestion()" id="ask-button" class="ask-button">Ask</button>
-            </div>
-        </div>
 
-        <!-- Right Panel - Space Information Center -->
+                <!-- Submit button -->
+                <button onclick="askQuestion()" id="ask-button" class="ask-button">
+                    Ask
+                </button>
+            </div>
+
+        </div>
+        <!-- END LEFT PANEL -->
+
+        <!-- ==========================================
+             RIGHT PANEL - SPACE INFORMATION WIDGETS
+             ========================================== -->
         <div class="right-panel">
-            <!-- Current Time Widget -->
+
+            <!-- ==========================================
+                 WIDGET 1: CURRENT TIME DISPLAY
+                 Updated every second by dashboard.js
+                 ========================================== -->
             <div class="space-widget time-widget">
                 <h3>Mission Control Time</h3>
+                <!-- Time display (format: HH:MM:SS AM/PM) -->
                 <div id="current-time"></div>
+                <!-- Date display (format: Weekday, Month Day, Year) -->
                 <div id="current-date"></div>
             </div>
-            <!-- ISS Status Widget -->
+
+            <!-- ==========================================
+                 WIDGET 2: ISS POSITION TRACKER
+                 Fetches data from /api/iss-position
+                 ========================================== -->
             <div class="space-widget iss-widget">
                 <h3>🛰️ ISS Status</h3>
-                <button onclick="trackISS()" id="track-iss-button">Track ISS</button>
+
+                <!-- Track ISS button (triggers dashboard.js trackISS()) -->
+                <button onclick="trackISS()" id="track-iss-button" data-default-text="Track ISS"
+                    data-loading-text="Tracking...">
+                    Track ISS
+                </button>
+
+                <!-- Loading indicator (shown during API call) -->
                 <div id="iss-loading" class="widget-loading" style="display: none;">
                     <p>🔄 Getting ISS position...</p>
                 </div>
+
+                <!-- ISS data display (populated by dashboard.js) -->
                 <div id="iss-info">
                     <p>Click "Track ISS" to get current position</p>
                 </div>
             </div>
-            <!-- Images Visualization Widget -->
+
+            <!-- ==========================================
+                 WIDGET 3: SPACE IMAGES (PLACEHOLDER)
+                 Future: NASA API integration
+                 ========================================== -->
             <div class="space-widget images-search-widget">
                 <h3>Space Pictures</h3>
                 <div id="images-search-widget">
                     <p></p>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- JavaScript Files -->
+        </div>
+        <!-- END RIGHT PANEL -->
+
+    </div>
+    <!-- END DASHBOARD CONTAINER -->
+
+    <!-- ==========================================
+         JAVASCRIPT FILES
+         Load order matters:
+         1. DOM utilities (element access)
+         2. Chat logic (uses DOM utilities)
+         3. Dashboard widgets (uses DOM utilities)
+         ========================================== -->
     <script src="/static/js/dom-utils.js"></script>
     <script src="/static/js/chat.js"></script>
     <script src="/static/js/dashboard.js"></script>
