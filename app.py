@@ -26,14 +26,6 @@ def home():
     return render_template("dashboard.html", title="Space Explorer's Dashboard")
 
 
-# Imports: brings Flask components and dotenv for environment variables
-# load_dotenv(): Reads .env file and makes variables available
-# Flask(name): Creates the web application instance
-# @app.route(): Decorator that tells Flask which URL triggers which function
-# render_template(): Renders HTML files from the templates folder
-# jsonify(): Returns JSON responses for API endpoints
-
-
 @app.route("/api/iss-position")
 @limiter.limit("15 per minute")  # Limits satelite requests
 def get_iss_position():
@@ -52,6 +44,12 @@ def get_iss_position():
     return jsonify(position_data)
 
 
+# Imports: brings Flask components and dotenv for environment variables
+# load_dotenv(): Reads .env file and makes variables available
+# Flask(name): Creates the web application instance
+# @app.route(): Decorator that tells Flask which URL triggers which function
+# render_template(): Renders HTML files from the templates folder
+# jsonify(): Returns JSON responses for API endpoints
 # Service instantiation: N2YOService() creates our service object
 # URL parameters: request.args.get() reads optional query parameters
 # Type conversion: type=float ensures coordinates are numbers

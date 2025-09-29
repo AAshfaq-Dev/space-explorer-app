@@ -37,7 +37,7 @@
             <div id="chat-container" class="chat-container">
                 <div id="chat-messages">
                     <div class="message ai-message">
-                        <strong>Space Assistant:</strong>
+                        <strong>Space AI:</strong>
                     </div>
                 </div>
             </div>
@@ -47,14 +47,27 @@
                     onkeypress="handleKeyPress(event)">
                 <button onclick="askQuestion()" id="ask-button" class="ask-button">Ask</button>
             </div>
-
-            <!-- <div id="loading" class="loading" style="display: none;">
-                <p>🤔 Thinking about your question...</p>
-            </div> -->
         </div>
 
         <!-- Right Panel - Space Information Center -->
         <div class="right-panel">
+            <!-- Current Time Widget -->
+            <div class="space-widget time-widget">
+                <h3>Mission Control Time</h3>
+                <div id="current-time"></div>
+                <div id="current-date"></div>
+            </div>
+            <!-- ISS Status Widget -->
+            <div class="space-widget iss-widget">
+                <h3>🛰️ ISS Status</h3>
+                <button onclick="trackISS()" id="track-iss-button">Track ISS</button>
+                <div id="iss-loading" class="widget-loading" style="display: none;">
+                    <p>🔄 Getting ISS position...</p>
+                </div>
+                <div id="iss-info">
+                    <p>Click "Track ISS" to get current position</p>
+                </div>
+            </div>
             <!-- Images Visualization Widget -->
             <div class="space-widget images-search-widget">
                 <h3>Space Pictures</h3>
