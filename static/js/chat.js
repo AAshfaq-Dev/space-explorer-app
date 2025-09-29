@@ -1,3 +1,9 @@
+// JavaScript Manages Behavior/Interaction
+//What happens when users interact
+//Dynamic updates to content
+//API calls and data processing
+//Example: DOM.voiceButton.classList.add('recording') says "button is now in recording state"
+
 // --- Global State Management ---
 let conversationHistory = [];
 let recognition = null;
@@ -222,7 +228,7 @@ function toggleVoiceRecording() {
 
     if (isRecording) {
         recognition.stop();
-        updateVoiceStatus('Stopped listening', '#9E9E9E');
+        updateVoiceStatus('Stopped listening', 'voice-status--stopped');
     } else {
         // IMPORTANT: Cancel any ongoing operations before starting new recording
         cancelAllActiveOperations();
@@ -231,7 +237,7 @@ function toggleVoiceRecording() {
             recognition.start();
         } catch (error) {
             console.error('Error starting recognition:', error);
-            updateVoiceStatus('Voice not available. Try reloading page.', '#f44336');
+            updateVoiceStatus('Voice not available. Try reloading page.', 'voice-status--error');
         }
     }
 }
@@ -251,10 +257,10 @@ function initSpeechRecognition() {
 
         recognition.onstart = () => {
             isRecording = true;
-            updateVoiceStatus('Listening... speak now!', '#FF5722');
+            updateVoiceStatus('Listening... speak now!', 'voice-status--listening');
             if (DOM.voiceButton) {
                 DOM.voiceButton.textContent = 'Tap to Stop';
-                DOM.voiceButton.style.backgroundColor = '#f44336';
+                DOM.voiceButton.classList.add('recording');
             }
         };
 
@@ -265,7 +271,7 @@ function initSpeechRecognition() {
             if (DOM.questionInput) {
                 DOM.questionInput.value = finalTranscript;
             }
-            updateVoiceStatus('Got it: "' + finalTranscript + '"', '#4CAF50');
+            updateVoiceStatus('Got it: "' + finalTranscript + '"', 'voice-status--ready');
 
             // Automatically ask the question after a short delay
             setTimeout(askQuestion, 1500);
@@ -273,25 +279,33 @@ function initSpeechRecognition() {
 
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
-            updateVoiceStatus('Could not hear that. Try again!', '#f44336');
-            resetVoiceButton();
+            updateVoiceStatus('Could not hear that. Try again!', 'voice-status--error');
+            // Reset button state
+            if (DOM.voiceButton) {
+                DOM.voiceButton.textContent = '🎤 Tap to Talk';
+                DOM.voiceButton.classList.remove('recording');
+            }
         };
 
         recognition.onend = () => {
             isRecording = false;
             if (DOM.voiceButton && DOM.voiceButton.textContent === 'Tap to Stop') {
-                updateVoiceStatus('Processing what you said...', '#FF9800');
+                updateVoiceStatus('Processing what you said...', 'voice-status--processing');
             }
-            resetVoiceButton();
+            // Reset button state
+            if (DOM.voiceButton) {
+                DOM.voiceButton.textContent = '🎤 Tap to Talk';
+                DOM.voiceButton.classList.remove('recording');
+            }
         };
 
-        updateVoiceStatus('Voice ready! Tap microphone to start.', '#4CAF50');
+        updateVoiceStatus('Voice ready! Tap microphone to start.', 'voice-status--ready');
         console.log('Speech recognition initialized successfully');
     } else {
         if (DOM.voiceButton) {
             DOM.voiceButton.style.display = 'none';
         }
-        updateVoiceStatus('Voice not supported in this browser. Try Chrome!', '#9E9E9E');
+        updateVoiceStatus('Voice not supported in this browser. Try Chrome!', 'voice-status--stopped');
         console.warn('Speech recognition not supported in this browser');
     }
 }
@@ -353,7 +367,7 @@ function askQuestion() {
     DOM.questionInput.value = '';
     showLoading(true);
     disableInput(true);
-    updateVoiceStatus(`Thinking about: "${questionText}"`, '#FF9800');
+    updateVoiceStatus(`Thinking about: "${questionText}"`, 'voice-status--processing');
 
     // --- STEP 4: API Call Setup ---
     const apiEndpoint = '/api/ask-with-voice';
@@ -397,7 +411,7 @@ function askQuestion() {
             if (data.status === 'success') {
                 const aiResponse = data.response;
                 addMessage('Space AI', aiResponse, 'ai');
-                updateVoiceStatus('Ready! Ask me anything about space.', '#4CAF50');
+                updateVoiceStatus('Ready! Ask me anything about space.', 'voice-status--ready');
 
                 // Play audio if available, otherwise use browser TTS
                 const hasNaturalAudio = data.audio_available && data.audio_data;
@@ -439,7 +453,7 @@ function askQuestion() {
                 disableInput(false);
                 const errorMessage = 'Oops! Something went wrong with the network. Please try again.';
                 addMessage('Space AI', errorMessage, 'error');
-                updateVoiceStatus('Ready! Ask me anything about space.', '#4CAF50');
+                updateVoiceStatus('Ready! Ask me anything about space.', 'voice-status--ready');
                 speakText(errorMessage, thisRequestId);
                 console.error('Fetch Error:', error);
             }

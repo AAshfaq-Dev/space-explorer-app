@@ -1,3 +1,10 @@
+/*CSS Manages Presentation
+
+How things look (colors, sizes, fonts, spacing)
+Layout and positioning
+Visual states
+Example: .voice-status--ready { color: #4CAF50; } says "ready status is green"
+
 /* Dashboard Layout - Optimized for iPads and Desktops */
 
 /* Global Reset and Base Styles */
@@ -74,6 +81,10 @@ body {
     transform: scale(1.05);
 }
 
+#voice-button.recording {
+    background-color: #f44336;
+}
+
 .stop-button {
     background-color: #9E9E9E;
     color: white;
@@ -84,11 +95,32 @@ body {
     margin-left: 10px;
 }
 
+/* Voice status states */
 .voice-status {
     margin: 10px 0;
     font-weight: bold;
     color: #ffffff;
     font-size: 14px;
+}
+
+.voice-status--ready {
+    color: #4CAF50;
+}
+
+.voice-status--listening {
+    color: #FF5722;
+}
+
+.voice-status--processing {
+    color: #FF9800;
+}
+
+.voice-status--error {
+    color: #f44336;
+}
+
+.voice-status--stopped {
+    color: #9E9E9E;
 }
 
 /* Chat Container */

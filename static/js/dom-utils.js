@@ -1,3 +1,9 @@
+// JavaScript Manages Behavior/Interaction
+//What happens when users interact
+//Dynamic updates to content
+//API calls and data processing
+//Example: DOM.voiceButton.classList.add('recording') says "button is now in recording state"
+
 // --- DOM Element Selection (Updated for Dashboard Layout) ---
 /**
  * Utility object for consistently accessing all required DOM elements in the dashboard.
@@ -28,10 +34,15 @@ const DOM = {
  * @param {string} message - The status message to display.
  * @param {string} color - The CSS color code for the text.
  */
-function updateVoiceStatus(message, color) {
+function updateVoiceStatus(message, statusClass) {
     if (DOM.voiceStatus) {
         DOM.voiceStatus.textContent = message;
-        DOM.voiceStatus.style.color = color;
+        // Remove all status classes
+        DOM.voiceStatus.className = 'voice-status';
+        // Add the new status class
+        if (statusClass) {
+            DOM.voiceStatus.classList.add(statusClass);
+        }
     }
 }
 

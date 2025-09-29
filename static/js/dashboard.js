@@ -1,3 +1,9 @@
+// JavaScript Manages Behavior/Interaction
+//What happens when users interact
+//Dynamic updates to content
+//API calls and data processing
+//Example: DOM.voiceButton.classList.add('recording') says "button is now in recording state"
+
 /**
  * dashboard.js - Manages right panel widgets and dashboard-specific functionality
  * This file handles: time display, ISS tracking, planet information, and future orbit visualization
@@ -5,7 +11,6 @@
 
 // --- Global Dashboard State ---
 let dashboardInterval = null;
-let currentPlanetData = null;
 
 /**
  * Initializes all dashboard widgets when the page loads
@@ -16,9 +21,6 @@ function initializeDashboard() {
 
     // Start the real-time clock
     startTimeDisplay();
-
-    // Initialize planet data
-    initializePlanetData();
 
     console.log('Dashboard initialization complete!');
 }
@@ -193,73 +195,6 @@ function displayISSError(errorMessage) {
             <p style="font-size: 12px; color: #a0aec0; margin-top: 5px;">
                 Try again in a moment
             </p>
-        `;
-    }
-}
-
-// --- Planet Information Functions ---
-
-/**
- * Initializes planet data for the planet widget
- * This creates a simple database of planet information
- */
-function initializePlanetData() {
-    currentPlanetData = {
-        mars: {
-            name: 'Mars',
-            distance: '225 million km from Sun',
-            facts: 'Red planet with polar ice caps and largest volcano in solar system',
-            moons: '2 moons (Phobos & Deimos)',
-            day: '24.6 hours'
-        },
-        jupiter: {
-            name: 'Jupiter',
-            distance: '778 million km from Sun',
-            facts: 'Largest planet with Great Red Spot storm larger than Earth',
-            moons: '95+ known moons including Io, Europa, Ganymede, Callisto',
-            day: '9.9 hours'
-        },
-        saturn: {
-            name: 'Saturn',
-            distance: '1.4 billion km from Sun',
-            facts: 'Famous for its ring system made of ice and rock particles',
-            moons: '146+ known moons including Titan with thick atmosphere',
-            day: '10.7 hours'
-        }
-    };
-
-    console.log('Planet data initialized');
-}
-
-/**
- * Shows information about a selected planet
- * This function displays planet facts in the planet widget
- */
-function showPlanetInfo(planetName) {
-    console.log(`Showing info for planet: ${planetName}`);
-
-    const displayElement = document.getElementById('planet-display');
-
-    if (!displayElement) {
-        console.error('Planet display element not found');
-        return;
-    }
-
-    const planetData = currentPlanetData[planetName];
-
-    if (planetData) {
-        displayElement.innerHTML = `
-            <div style="text-align: left;">
-                <h4 style="color: #4CAF50; margin-bottom: 8px;">${planetData.name}</h4>
-                <p><strong>Distance:</strong> ${planetData.distance}</p>
-                <p><strong>Day Length:</strong> ${planetData.day}</p>
-                <p><strong>Moons:</strong> ${planetData.moons}</p>
-                <p style="margin-top: 8px; font-size: 12px;">${planetData.facts}</p>
-            </div>
-        `;
-    } else {
-        displayElement.innerHTML = `
-            <p style="color: #fc8181;">Planet data not found</p>
         `;
     }
 }
