@@ -1,16 +1,33 @@
-// JavaScript Manages Behavior/Interaction
-//What happens when users interact
-//Dynamic updates to content
-//API calls and data processing
-//Example: DOM.voiceButton.classList.add('recording') says "button is now in recording state"
+// ============================================
+// DOM-UTILS.JS - DOM Element Access and Updates
+// ============================================
+// Centralized DOM element references and utility functions
+// Used by: chat.js, dashboard.js
+// ============================================
 
-// --- DOM Element Selection (Updated for Dashboard Layout) ---
+/* ============================================
+   TABLE OF CONTENTS
+   ============================================
+   1. DOM Element References
+   2. Voice Status Updates
+   3. UI State Management
+   4. Chat Message Functions
+   5. Dashboard Widget Utilities
+   6. Validation Functions
+   ============================================ */
+
+
+// ============================================
+// 1. DOM ELEMENT REFERENCES
+// Single source of truth for all DOM elements
+// ============================================
+
 /**
- * Utility object for consistently accessing all required DOM elements in the dashboard.
- * This has been updated to work with the new single-page dashboard structure.
+ * Centralized DOM element access
+ * Makes it easy to find and update element references
  */
 const DOM = {
-    // Chat-related elements (left panel)
+    // --- Chat Interface Elements ---
     voiceButton: document.getElementById('voice-button'),
     stopSpeakingButton: document.getElementById('stop-speaking-button'),
     voiceStatus: document.getElementById('voice-status'),
@@ -19,7 +36,7 @@ const DOM = {
     loading: document.getElementById('loading'),
     chatMessages: document.getElementById('chat-messages'),
 
-    // Dashboard-specific elements (right panel)
+    // --- Dashboard Widget Elements ---
     currentTime: document.getElementById('current-time'),
     currentDate: document.getElementById('current-date'),
     issLoading: document.getElementById('iss-loading'),
@@ -29,17 +46,26 @@ const DOM = {
     orbitDisplay: document.getElementById('orbit-display')
 };
 
+
+// ============================================
+// 2. VOICE STATUS UPDATES
+// Functions for updating voice recognition status
+// ============================================
+
 /**
- * Updates the voice status message and color for user feedback.
- * @param {string} message - The status message to display.
- * @param {string} color - The CSS color code for the text.
+ * Updates voice status message and applies appropriate CSS class
+ * 
+ * @param {string} message - Status message to display
+ * @param {string} statusClass - CSS class for color (e.g., 'voice-status--ready')
  */
 function updateVoiceStatus(message, statusClass) {
     if (DOM.voiceStatus) {
         DOM.voiceStatus.textContent = message;
-        // Remove all status classes
+
+        // Remove all status classes first
         DOM.voiceStatus.className = 'voice-status';
-        // Add the new status class
+
+        // Add the new status class for color coding
         if (statusClass) {
             DOM.voiceStatus.classList.add(statusClass);
         }
@@ -47,18 +73,28 @@ function updateVoiceStatus(message, statusClass) {
 }
 
 /**
- * Resets the voice button appearance to the default 'Tap to Talk' state.
+ * Resets voice button to default "Tap to Talk" state
+ * Called after recording stops or errors occur
  */
 function resetVoiceButton() {
     if (DOM.voiceButton) {
-        DOM.voiceButton.textContent = '🎤 Tap to Talk';
+        // Use data attribute if available, otherwise hardcoded text
+        const defaultText = DOM.voiceButton.dataset.defaultText || '🎤 Tap to Talk';
+        DOM.voiceButton.textContent = defaultText;
         DOM.voiceButton.style.backgroundColor = '#FF5722';
     }
 }
 
+
+// ============================================
+// 3. UI STATE MANAGEMENT
+// Control visibility and disabled states
+// ============================================
+
 /**
- * Controls the visibility of the loading indicator.
- * @param {boolean} show - True to show, false to hide.
+ * Shows or hides loading indicator
+ * 
+ * @param {boolean} show - True to show, false to hide
  */
 function showLoading(show) {
     if (DOM.loading) {
@@ -67,8 +103,10 @@ function showLoading(show) {
 }
 
 /**
- * Disables or enables the input elements during API processing.
- * @param {boolean} disable - True to disable, false to enable.
+ * Enables or disables input elements during API processing
+ * Prevents multiple simultaneous requests
+ * 
+ * @param {boolean} disable - True to disable, false to enable
  */
 function disableInput(disable) {
     if (DOM.questionInput) DOM.questionInput.disabled = disable;
@@ -76,11 +114,19 @@ function disableInput(disable) {
     if (DOM.voiceButton) DOM.voiceButton.disabled = disable;
 }
 
+
+// ============================================
+// 4. CHAT MESSAGE FUNCTIONS
+// Add and display messages in chat container
+// ============================================
+
 /**
- * Adds a new message to the chat display using CSS classes for styling.
- * @param {string} sender - 'You' or 'Space AI'.
- * @param {string} message - The content of the message.
- * @param {('user'|'ai'|'error')} type - The type of message for styling.
+ * Adds a message to the chat display
+ * Uses CSS classes for styling different message types
+ * 
+ * @param {string} sender - 'You' or 'Space AI'
+ * @param {string} message - The message content
+ * @param {('user'|'ai'|'error')} type - Message type for styling
  */
 function addMessage(sender, message, type) {
     if (!DOM.chatMessages) {
@@ -88,51 +134,83 @@ function addMessage(sender, message, type) {
         return;
     }
 
+    // Create message element
     const messageDiv = document.createElement('div');
-    // Determine the class based on type
-    const className = (type === 'user') ? 'user-message' : (type === 'error') ? 'error-message' : 'ai-message';
+
+    // Determine CSS class based on message type
+    const className = (type === 'user') ? 'user-message'
+        : (type === 'error') ? 'error-message'
+            : 'ai-message';
 
     messageDiv.className = 'message ' + className;
     messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
 
+    // Add to chat container
     DOM.chatMessages.appendChild(messageDiv);
 
-    // Scroll to the bottom of the chat container
+    // Auto-scroll to show latest message
     DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
 }
 
+
+// ============================================
+// 5. DASHBOARD WIDGET UTILITIES
+// Helper functions for right panel widgets
+// ============================================
+
 /**
- * Dashboard-specific utility: Updates ISS widget loading state
- * @param {boolean} isLoading - True to show loading, false to hide
+ * Updates ISS widget loading state
+ * Shows/hides loading indicator and updates button
+ * 
+ * @param {boolean} isLoading - True when fetching data
  */
 function updateISSLoadingState(isLoading) {
     if (DOM.issLoading) {
         DOM.issLoading.style.display = isLoading ? 'block' : 'none';
     }
+
     if (DOM.trackIssButton) {
         DOM.trackIssButton.disabled = isLoading;
-        DOM.trackIssButton.textContent = isLoading ? 'Tracking...' : 'Track ISS';
+
+        // Use data attributes if available
+        const loadingText = DOM.trackIssButton.dataset.loadingText || 'Tracking...';
+        const defaultText = DOM.trackIssButton.dataset.defaultText || 'Track ISS';
+
+        DOM.trackIssButton.textContent = isLoading ? loadingText : defaultText;
     }
 }
 
+
+// ============================================
+// 6. VALIDATION FUNCTIONS
+// Check if required DOM elements exist
+// ============================================
+
 /**
- * Dashboard-specific utility: Checks if all required elements are present
- * This helps with debugging if elements are missing from the dashboard
+ * Validates that all required dashboard elements are present
+ * Useful for debugging if elements are missing
+ * 
+ * @returns {boolean} True if all elements found, false otherwise
  */
 function validateDashboardElements() {
+    // List of required element IDs
     const requiredElements = [
-        'voice-button', 'question-input', 'ask-button',
-        'chat-messages'//, 'current-time', 'iss-info'
+        'voice-button',
+        'question-input',
+        'ask-button',
+        'chat-messages'
     ];
 
     const missingElements = [];
 
+    // Check each required element
     for (const elementId of requiredElements) {
         if (!document.getElementById(elementId)) {
             missingElements.push(elementId);
         }
     }
 
+    // Log results
     if (missingElements.length > 0) {
         console.warn('Missing dashboard elements:', missingElements);
         return false;
