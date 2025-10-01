@@ -23,6 +23,8 @@ instance/
 .webassets-cache
 
 # IDE
+.mypy_cache/
+.ruff_cache/
 .vscode/
 .idea/
 *.swp

@@ -4,6 +4,8 @@ import os
 
 import requests
 
+base_url = "https://texttospeech.googleapis.com/v1/text:synthesize"
+
 
 class TTSService:
     """Service for Google Text to Speech with natural voices"""
@@ -27,8 +29,10 @@ class TTSService:
 
         try:
             # Set the text input to be synthesized
-            url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={self.api_key}"
-
+            url = (
+                "https://texttospeech.googleapis.com/v1/text:"
+                f"synthesize?key={self.api_key}"
+            )
             # request payload
             payload = {
                 "input": {"text": text},

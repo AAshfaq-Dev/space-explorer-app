@@ -27,6 +27,8 @@ env/
 
 # IDE files
 .vscode/
+.mypy_cache/
+.ruff_cache/
 .idea/
 *.swp
 *.swo
