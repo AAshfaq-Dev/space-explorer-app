@@ -1,4 +1,11 @@
-# test_rate_limit_cert_fix.py
+# Test Type:
+# Functional / E2E Test
+# Layer Tested:
+# System Feature / Performance
+# Purpose:
+# Tests a specific non-core feature by intentionally sending a burst of requests
+# to confirm that the server successfully enforces the rate limit
+# and returns the expected 429 Too Many Requests status.
 
 import requests
 import time

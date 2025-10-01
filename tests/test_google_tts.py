@@ -1,4 +1,12 @@
-# Test the Googles Text to Speech Service
+# Test Type:
+# External Integration Test
+# Layer Tested:
+# Google Text to Space (TTS) API / Infrastructure
+# Purpose:
+# Checks if the TTSService can initialize
+# Successfully communicate with Google's Text-to-Speech service
+# Generate audio data.
+
 import sys
 import os
 

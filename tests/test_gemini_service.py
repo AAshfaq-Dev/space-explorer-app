@@ -1,4 +1,12 @@
-# Quick test of the Gemini Service.
+# Test Type:
+# Internal and External Integration Test
+# Layer Tested:
+# Custom Service Logic
+# Purpose:
+# Verifies the core logic of the GeminiService class,
+# ensuring it handles input and returns the structured output
+# (status, source, response) correctly by running multiple test questions.
+
 from dotenv import load_dotenv
 from services.gemini_service import GeminiService
 

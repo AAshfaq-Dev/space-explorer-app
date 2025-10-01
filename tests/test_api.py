@@ -1,4 +1,12 @@
-# Test the Flask api endpoint
+# Test Type:
+# End to End (E2E) Test
+# Layer Tested:
+# HTTP API / System
+# Purpose:
+# Simulates a real client request to the running Flask server's /api/ask endpoint,
+# checking the entire stack (HTTP connection, routing, and final response handling).
+
+
 import requests
 import json
 

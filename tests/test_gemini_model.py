@@ -1,4 +1,13 @@
-# debug_gemini.py - Check available Gemini models
+# Test Type:
+# External Integration Test
+# Layer Tested:
+# Gemini API / Infrastructure
+# Purpose:
+# Verifies that the Python SDK is configured,
+# That the API key is valid,
+# Connectivity to Google's Gemini servers is successful.
+
+
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
