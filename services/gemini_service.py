@@ -1,5 +1,6 @@
 # Handles Google Gemini AI Interactions
 import os
+
 import google.generativeai as genai
 
 
@@ -30,19 +31,22 @@ class GeminiService:
             return {
                 "status": "success",
                 "response": "This is a demo response."
-                f"Please configure your Google API key to use real Gemini AI.",
+                "Please configure your Google API key to use real Gemini AI.",
                 "source": "Mock",
             }
 
         try:
             # Create child-friendly system prompt
-            system_prompt = """You are a friendly space educator talking to curious children about astronomy, space, and satellites. 
+            system_prompt = """
+You are a friendly space educator talking to curious children about astronomy,
+space, and satellites.
 
 Personalisation:
 - Confirm if you're speaking to Isaac.
-- If user responds yes or similat to your question confirming if its Isaac, then say use his name thoughtfully in subsequent responses.
+- If user responds yes or similat to your question confirming if its Isaac, 
+then say use his name thoughtfully in subsequent responses.
 - Isaac is 6 years old and loves exoplanets.
-            
+
 Keep your answers:
 - Simple and easy to understand
 - Exciting and fun
@@ -51,17 +55,20 @@ Keep your answers:
 - Include amazing space facts when relevant
 
 IMPORTANT: Your responses will be read aloud, so:
-- Do NOT use asterisks (*) or other markdown formatting
+- Do NOT use asterisks or other markdown formatting
 - Do NOT use special characters or symbols
 - Write in plain text that sounds natural when spoken
 - Instead of formatting emphasis, use natural speech patterns
-- Say "Fun Fact:" or "Here's something cool:" instead of "**Fun Fact:**"
+- Say "Fun Fact:" or "Here's something cool:" instead of "Fun Fact:"
 
 CRITICAL - Accuracy for children:
-- When asked about exoplanets or names that are given to exoplanets, search through resources such as NASA, International Astronomical Union or current data information.
-- If you don't know about a specific object, planet, or satellite, say so honestly unless you have information as searched above.
+- When asked about exoplanets or names that are given to exoplanets, search through
+resources such as NASA, International Astronomical Union or current data information.
+- If you don't know about a specific object, planet, or satellite, 
+say so honestly unless you have information as searched above.
 - Do NOT make up facts or guess about specific names or numbers
-- Instead say: "I'm not sure about that specific one, but let me tell you about similar objects!"
+- Instead say: "I'm not sure about that specific one, but let me tell you about similar
+objects!"
 - It's better to admit uncertainty than to give wrong information to children
 
 Topics you can help with:
@@ -81,7 +88,8 @@ Always be encouraging about learning and space exploration!"""
                         for msg in conversation_history[-3:]
                     ]
                 )  # Last 3 messages
-                full_prompt = f"{system_prompt}\n\nPrevious conversation:\n{context}\n\nChild: {question}\nSpace Guide:"
+                full_prompt = f"{system_prompt}\n\nPrevious conversation:"
+                f"\n{context}\n\nChild: {question}\nSpace Guide:"
             else:
                 full_prompt = f"{system_prompt}\n\nChild: {question}\nSpace Guide:"
 
@@ -97,6 +105,7 @@ Always be encouraging about learning and space exploration!"""
             print(f"Gemini API error: {str(error)}")
             return {
                 "status": "error",
-                "response": "Sorry, I had trouble thinking of an answer right now. Can you try asking again?",
+                "response": "Sorry, I had trouble thinking of an answer right now."
+                "Can you try asking again?",
                 "source": "error",
             }

@@ -1,7 +1,7 @@
 # Googles Natual Text to Speech API Service
 # Updated to using REST API with API Key (simpler)
 import os
-import base64
+
 import requests
 
 

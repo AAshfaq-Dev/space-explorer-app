@@ -8,6 +8,7 @@
 # (status, source, response) correctly by running multiple test questions.
 
 from dotenv import load_dotenv
+
 from services.gemini_service import GeminiService
 
 # Loads the env variable

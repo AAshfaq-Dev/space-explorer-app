@@ -1,7 +1,8 @@
 # Simple rate limiting
+import os
+
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-import os
 
 
 def create_limiter(app):

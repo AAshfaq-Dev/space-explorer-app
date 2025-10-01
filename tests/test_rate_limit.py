@@ -7,8 +7,9 @@
 # to confirm that the server successfully enforces the rate limit
 # and returns the expected 429 Too Many Requests status.
 
-import requests
 import time
+
+import requests
 
 # -----------------
 # CONFIGURATION CONSTANT

@@ -1,12 +1,14 @@
 # Main Flask Application entry point
 import os
 import time
-from flask import Flask, render_template, jsonify, request
+
 from dotenv import load_dotenv
-from services.n2yo_service import N2YOService  # Allows connection to N2YO API
+from flask import Flask, jsonify, render_template, request
+
 from services.gemini_service import GeminiService  # Allows connection to Gemini API
-from services.tts_service import TTSService  # Allows conncetion to Googles TTS API
+from services.n2yo_service import N2YOService  # Allows connection to N2YO API
 from services.rate_limiter import create_limiter  # adds limits to requests
+from services.tts_service import TTSService  # Allows conncetion to Googles TTS API
 
 # Loads environment from env. file
 load_dotenv()
@@ -77,7 +79,7 @@ def ask_ai():
         result = gemini_service.ask_question(question, conversation_history)
 
         return jsonify(result)
-    except Exception as error:
+    except Exception:
         return jsonify(
             {
                 "status": "error",
@@ -121,7 +123,7 @@ def ask_ai_with_voice():
             }
         )
 
-    except Exception as error:
+    except Exception:
         return jsonify(
             {
                 "status": "error",

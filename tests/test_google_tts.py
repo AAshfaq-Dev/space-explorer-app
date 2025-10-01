@@ -7,12 +7,13 @@
 # Successfully communicate with Google's Text-to-Speech service
 # Generate audio data.
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dotenv import load_dotenv
+
 from services.tts_service import TTSService
 
 load_dotenv()

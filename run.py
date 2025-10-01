@@ -1,5 +1,6 @@
 # Google cloud run entry point
 import os
+
 from app import app
 
 if __name__ == "__main__":

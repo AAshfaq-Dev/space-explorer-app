@@ -1,0 +1,32 @@
+# pyproject.toml
+# Central config file for Black + Ruff
+# Place this at the root of your project
+
+[tool.black]
+# Default line length Black enforces
+line-length = 88
+# Target specific Python version for formatting (adjust if needed)
+target-version = ["py312"]
+# Skip string normalization if you want to preserve existing quotes
+# skip-string-normalization = true
+
+[tool.ruff]
+# Keep line length consistent with Black
+line-length = 88
+# Target Python version for linting
+target-version = "py312"
+
+[tool.ruff.lint]
+# Select linting rulesets:
+# E = pycodestyle (PEP8), F = pyflakes, I = import sorting
+select = ["E", "F", "I"]
+# Ignore specific rule codes if desired (example: W503 for line break before binary operator)
+ignore = []
+
+[tool.ruff.format]
+# Enable Black-compatible formatting inside Ruff
+# This ensures Ruff’s formatter matches Black’s style
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

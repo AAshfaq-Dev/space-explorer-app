@@ -1,6 +1,7 @@
-import requests
 import os
 import time  # added for mock tests.
+
+import requests
 
 
 class N2YOService:

@@ -7,8 +7,8 @@
 # checking the entire stack (HTTP connection, routing, and final response handling).
 
 
+
 import requests
-import json
 
 # Test data
 test_questions = {"question": "What makes stars shine?", "history": []}
