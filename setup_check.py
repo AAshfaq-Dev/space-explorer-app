@@ -77,7 +77,6 @@ def run_scripts_in_folder(folder: str, exclude_list: List[str]) -> None:
 
     # Iterate over all .py files in the specified folder
     for script in scripts_path.glob("*.py"):
-
         # 💡 FEATURE: Check if the current script should be skipped
         if script.name in exclude_list:
             print(f"Skipping API/E2E test: {script.name}")

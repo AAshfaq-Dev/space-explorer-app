@@ -19,9 +19,9 @@ gemini_service = GeminiService()
 
 # Test questions
 test_questions = [
-    "What is the International Space Station?",
-    "How far is the Moon?",
-    "Why do satellites stay in space",
+    "This is a test, what is the International Space Station?",
+    "This is a test, ehow far is the Moon?",
+    "This is a test, Why do satellites stay in space",
 ]
 
 print("Testing Gemini Service...")
